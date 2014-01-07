@@ -29,7 +29,9 @@ class CCEdit(QMainWindow):
         self.open_action = self.file_menu.addAction('Open')
         self.open_action.triggered.connect(self.on_open)
         self.save_action = self.file_menu.addAction('Save')
+        self.save_action.triggered.connect(self.on_save)
         self.save_as_action = self.file_menu.addAction('Save As')
+        self.save_as_action.triggered.connect(self.on_save_as)
         self.file_menu.addSeparator()
         self.close_action = self.file_menu.addAction('Close')
         self.close_action.triggered.connect(self.qt_app.quit)
@@ -65,15 +67,38 @@ class CCEdit(QMainWindow):
         self.text_widget.setText(data)
         self.__update_title()
 
+    @Slot()
+    def on_save(self):
+        print(self.current_file)
+        if self.current_file is not None:
+            self.__save_file()
+        else:
+            self.on_save_as()
+
+    @Slot()
+    def on_save_as(self):
+        file_name = QFileDialog.getSaveFileName(None, "Save File", os.path.expanduser("~"),
+                                                "Text files (*.txt);;All Files (*.*)")[0]
+        if(file_name):
+            self.current_file = file_name
+            self.__save_file()
+            self.__update_title()
+
     def run(self):
         self.show()
         self.qt_app.exec_()
 
     def __update_title(self):
-        if self.current_file:
+        if self.current_file is not None:
             self.setWindowTitle('CCEdit - %s' % os.path.basename(self.current_file))
         else:
             self.setWindowTitle('CCEdit - Untitled')
+
+    def __save_file(self):
+        if self.current_file is None:
+            Exception('Filename not set')
+        with open(self.current_file, 'w') as file:
+                file.write(self.text_widget.toPlainText())
 
 def main():
     qt_app = QApplication(sys.argv)
