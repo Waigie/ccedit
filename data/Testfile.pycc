@@ -1,0 +1,9 @@
+dim Parameter<x, y, z> in
+dim Implementation<times, plus> in
+
+print("Choice Calculus Test")
+
+def twice(Parameter<x, y>):
+    return Implementation<Parameter<x, y, z>+Parameter<x, y, z>,2*Parameter<x, y, z>>  
+
+print(twice(2))
