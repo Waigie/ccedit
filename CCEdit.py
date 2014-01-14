@@ -6,6 +6,7 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 import CCParser.Parser
 from CCEdit.CCEditTab import CCEditTab
+from CCEdit.CCParsedTab import CCParsedTab
 
 
 class CCEdit(QMainWindow):
@@ -18,8 +19,6 @@ class CCEdit(QMainWindow):
         self.qt_app = qt_app
 
         self.central_widget = QWidget(self)
-        self.central_widget.setStyleSheet('margin: 0;')
-
         self.setCentralWidget(self.central_widget)
 
         layout = QVBoxLayout()
@@ -55,8 +54,6 @@ class CCEdit(QMainWindow):
         self.tab_widget.tabCloseRequested.connect(self.on_close_tab)
         layout.addWidget(self.tab_widget)
 
-        self.tab_widget.addTab(CCEditTab(), 'Unsaved')
-
         self.central_widget.setLayout(layout)
 
         #self.__update_title()
@@ -89,7 +86,10 @@ class CCEdit(QMainWindow):
     def on_parse(self):
         tab = self.tab_widget.currentIndex()
         parser = CCParser.Parser.Parser(self.tab_widget.widget(tab).toPlainText())
-        parser.parse()
+        result = parser.parse()
+        tab_num = self.tab_widget.addTab(CCParsedTab(result), 'Result')
+        self.tab_widget.setCurrentIndex(tab_num)
+
 
     @Slot()
     def on_close_tab(self, num):

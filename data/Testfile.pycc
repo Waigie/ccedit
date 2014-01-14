@@ -1,9 +1,5 @@
 dim Parameter<x, y, z> in
-dim Implementation<times, plus> in
+dim Implementation<plus, times> in
 
-print("Choice Calculus Test")
-
-def twice(Parameter<x, y>):
-    return Implementation<Parameter<x, y, z>+Parameter<x, y, z>,2*Parameter<x, y, z>>  
-
-print(twice(2))
+def twice(Parameter<x, y, z>):
+    return Implementation<Parameter<x, y, z>+Parameter<x, y, z>,2*Parameter<x, y, z>>

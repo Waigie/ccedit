@@ -1,7 +1,7 @@
 __author__ = 'Christoph Weygand'
 
 import os.path
-from PySide.QtGui import QTextEdit, QFileDialog
+from PySide.QtGui import QTextEdit, QFileDialog, QWidget
 
 
 class CCEditTab(QTextEdit):
@@ -28,7 +28,7 @@ class CCEditTab(QTextEdit):
 
     def save_as(self):
         filename = QFileDialog.getSaveFileName(None, "Save File", os.path.expanduser("~"),
-                                               "Python Choice Calculus (*.pycc);;Text files (*.txt);;All Files (*.*)")[0]
+                                               "Python Choice Calculus (*.pycc);;All Files (*.*)")[0]
         if filename:
             self.__save_to_file(filename)
             self.__current_file = filename
