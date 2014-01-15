@@ -7,6 +7,7 @@ from PySide.QtGui import *
 import CCParser.Parser
 from CCEdit.CCEditTab import CCEditTab
 from CCEdit.CCParsedTab import CCParsedTab
+from CCEdit.CCDimensionDock import CCDimensionDock
 
 
 class CCEdit(QMainWindow):
@@ -55,6 +56,9 @@ class CCEdit(QMainWindow):
         layout.addWidget(self.tab_widget)
 
         self.central_widget.setLayout(layout)
+
+        self.dimension_dock = CCDimensionDock(self)
+        self.addDockWidget(Qt.DockWidgetArea(1), self.dimension_dock)
 
         #self.__update_title()
 
