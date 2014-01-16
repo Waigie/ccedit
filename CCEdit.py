@@ -4,8 +4,8 @@ import sys
 import os.path
 from PySide.QtCore import *
 from PySide.QtGui import *
-import CCParser.Parser
 from CCEdit.Widgets import EditTab, DimensionDock
+
 
 class CCEdit(QMainWindow):
     """Main Window for CCEdit"""
@@ -51,8 +51,6 @@ class CCEdit(QMainWindow):
 
         self.dimension_dock = DimensionDock(self)
         self.addDockWidget(Qt.DockWidgetArea(1), self.dimension_dock)
-
-        #self.__update_title()
 
     @Slot()
     def on_new(self):
