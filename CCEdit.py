@@ -60,8 +60,9 @@ class CCEdit(QMainWindow):
     def on_open(self):
         filename = QFileDialog.getOpenFileName(None, "Open File", os.path.expanduser("~"),
                                                "Python CC (*.pycc);;Text files (*.txt);;All Files (*.*)")[0]
-        tab = self.tab_widget.addTab(EditTab(filename), os.path.basename(filename))
-        self.tab_widget.setCurrentIndex(tab)
+        if filename:
+            tab = self.tab_widget.addTab(EditTab(filename), os.path.basename(filename))
+            self.tab_widget.setCurrentIndex(tab)
 
 
     @Slot()
