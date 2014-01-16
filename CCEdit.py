@@ -5,10 +5,7 @@ import os.path
 from PySide.QtCore import *
 from PySide.QtGui import *
 import CCParser.Parser
-from CCEdit.CCEditTab import CCEditTab
-from CCEdit.CCParsedTab import CCParsedTab
-from CCEdit.CCDimensionDock import CCDimensionDock
-
+from CCEdit.Widgets import EditTab, DimensionDock
 
 class CCEdit(QMainWindow):
     """Main Window for CCEdit"""
@@ -43,12 +40,7 @@ class CCEdit(QMainWindow):
         self.close_action.setShortcut(QKeySequence.Close)
         self.close_action.triggered.connect(self.qt_app.quit)
 
-        self.action_menu = QMenu("Action")
-        self.compile_action = self.action_menu.addAction('Parse')
-        self.compile_action.triggered.connect(self.on_parse)
-
         self.menuBar().addMenu(self.file_menu)
-        self.menuBar().addMenu(self.action_menu)
 
         self.tab_widget = QTabWidget(self.central_widget)
         self.tab_widget.setTabsClosable(True)
@@ -57,20 +49,20 @@ class CCEdit(QMainWindow):
 
         self.central_widget.setLayout(layout)
 
-        self.dimension_dock = CCDimensionDock(self)
+        self.dimension_dock = DimensionDock(self)
         self.addDockWidget(Qt.DockWidgetArea(1), self.dimension_dock)
 
         #self.__update_title()
 
     @Slot()
     def on_new(self):
-        self.tab_widget.addTab(CCEditTab(), 'Unsaved')
+        self.tab_widget.addTab(EditTab(), 'Unsaved')
 
     @Slot()
     def on_open(self):
         filename = QFileDialog.getOpenFileName(None, "Open File", os.path.expanduser("~"),
                                                "Python CC (*.pycc);;Text files (*.txt);;All Files (*.*)")[0]
-        tab = self.tab_widget.addTab(CCEditTab(filename), os.path.basename(filename))
+        tab = self.tab_widget.addTab(EditTab(filename), os.path.basename(filename))
         self.tab_widget.setCurrentIndex(tab)
 
 
@@ -85,15 +77,6 @@ class CCEdit(QMainWindow):
         tab = self.tab_widget.currentIndex()
         self.tab_widget.widget(tab).save_sas()
         self.__update_title()
-
-    @Slot()
-    def on_parse(self):
-        tab = self.tab_widget.currentIndex()
-        parser = CCParser.Parser.Parser(self.tab_widget.widget(tab).toPlainText())
-        result = parser.parse()
-        tab_num = self.tab_widget.addTab(CCParsedTab(result), 'Result')
-        self.tab_widget.setCurrentIndex(tab_num)
-
 
     @Slot()
     def on_close_tab(self, num):
