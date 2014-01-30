@@ -128,5 +128,118 @@ class DimensionDialog(QDialog):
             pass
 
 
+class MainWindow(QMainWindow):
+    def __init__(self):
+        QMainWindow.__init__(self)
+        self.setMinimumSize(QSize(640, 480))
+        self.setWindowTitle('CCEdit')
+
+        self.central_widget = QWidget(self)
+        self.setCentralWidget(self.central_widget)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        file_menu = QMenu("File")
+        self.new_action = file_menu.addAction('New')
+        self.new_action.setShortcut(QKeySequence.New)
+        self.new_action.triggered.connect(self.on_new)
+        self.new_handler = None
+        self.open_action = file_menu.addAction('Open')
+        self.open_action.setShortcut(QKeySequence.Open)
+        self.open_action.triggered.connect(self.on_open)
+        self.open_handler = None
+        self.save_action = file_menu.addAction('Save')
+        self.save_action.setShortcut(QKeySequence.Save)
+        self.save_action.triggered.connect(self.on_save)
+        self.save_handler = None
+        self.save_as_action = file_menu.addAction('Save As')
+        self.save_as_action.setShortcut(QKeySequence.SaveAs)
+        self.save_as_action.triggered.connect(self.on_save_as)
+        self.save_as_handler = None
+        file_menu.addSeparator()
+        self.close_action = file_menu.addAction('Close')
+        self.close_action.setShortcut(QKeySequence.Close)
+        self.close_action.triggered.connect(self.on_close)
+        self.close_handler = None
+
+        self.menuBar().addMenu(file_menu)
+
+        self.tab_widget = QTabWidget(self.central_widget)
+        self.tab_widget.setTabsClosable(True)
+        #self.tab_widget.tabCloseRequested.connect(self.on_close_tab)
+        layout.addWidget(self.tab_widget)
+
+        self.central_widget.setLayout(layout)
+
+        self.log_dock = LogDock(self)
+        self.addDockWidget(Qt.DockWidgetArea(Qt.BottomDockWidgetArea), self.log_dock)
+
+    def update_log_view(self, data):
+        self.log_dock.set_data(data)
+
+    def set_new_handler(self, handler: callable):
+        self.new_handler = handler
+
+    def set_open_handler(self, handler):
+        self.open_handler = handler
+
+    def set_save_handler(self, handler):
+        self.save_handler = handler
+
+    def set_save_as_handler(self, handler):
+        self.save_as_handler = handler
+
+    def set_close_handler(self, handler):
+        self.close_handler = handler
+
+    @Slot()
+    def on_new(self):
+        try:
+            self.new_handler()
+        except Exception:
+            pass
+
+    @Slot()
+    def on_open(self):
+        try:
+            self.open_handler()
+        except TypeError:
+            pass
+
+    @Slot()
+    def on_save(self):
+        try:
+            self.save_handler()
+        except Exception:
+            pass
+
+    @Slot()
+    def on_save_as(self):
+        try:
+            self.save_as_handler()
+        except Exception:
+            pass
+
+    @Slot()
+    def on_close(self):
+        try:
+            self.close_handler()
+        except Exception:
+            pass
 
 
+class LogDock(QDockWidget):
+    def __init__(self, parent_window):
+        QDockWidget.__init__(self, parent_window)
+        self.setWindowTitle('Log')
+        self.setAllowedAreas(Qt.DockWidgetAreas(Qt.BottomDockWidgetArea))
+
+        self.text_edit = QTextEdit(self)
+        self.text_edit.setReadOnly(True)
+        self.setWidget(self.text_edit)
+
+    def set_data(self, data):
+        self.text_edit.setText(data)
+        scrollbar = self.text_edit.verticalScrollBar()
+        scrollbar.setValue(scrollbar.maximum())
