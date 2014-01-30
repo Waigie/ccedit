@@ -14,6 +14,7 @@ class MainController(QObject):
         self.view = view
         self.view.set_new_handler(self.new_action)
         self.view.set_close_handler(self.close_action)
+        self.view.set_add_dimension_handler(self._add_dimension)
         self.view.show()
 
         self.log = CCEdit.Models.Log()
@@ -29,6 +30,16 @@ class MainController(QObject):
     def _update_log(self):
         self.view.update_log_view(self.log.__str__())
 
+    @Slot()
+    def _add_dimension(self):
+        dialog = CCEdit.Widgets.DimensionDialog(self.view)
+        res = dialog.exec_()
+        if res == QDialog.Accepted:
+            name = dialog.get_dimension_name()
+            choices = dialog.get_choices()
+            print(choices)
+
+
     def new_action(self):
         self.file = CCEdit.Models.File()
         self._update_view()
@@ -37,7 +48,7 @@ class MainController(QObject):
         self.qt_app.exit()
 
     def _update_view(self):
-        self.view.setText(self.file.generate_output())
+        self.view.set_text(self.file.generate_output())
 
 
 def main():

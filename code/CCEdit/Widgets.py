@@ -29,22 +29,19 @@ class DimensionDock(QDockWidget):
         layout.addWidget(self.table_widget)
 
         self.add_button = QPushButton("Add dimension")
-        self.add_button.clicked.connect(self.on_add_dimension)
+        #self.add_button.clicked.connect(self.add_handler)
         layout.addWidget(self.add_button)
         self.central_widget.setLayout(layout)
 
         self.dialog = None
 
+    def set_add_handler(self, handler):
+        self.add_button.clicked.connect(handler)
+
     @Slot()
     def on_add_dimension(self):
-        if self.parent_window.tab_widget.currentIndex() < 0:
-            msg_box = QMessageBox()
-            msg_box.setWindowTitle('Error')
-            msg_box.setText('Creating dimensions is not possible without open document.')
-            msg_box.exec_()
-        else:
-            self.dialog = DimensionDialog(self.parent_window)
-            self.dialog.show()
+        self.dialog = DimensionDialog(self.parent_window)
+        self.dialog.show()
 
 
 class DimensionDialog(QDialog):
@@ -65,9 +62,10 @@ class DimensionDialog(QDialog):
         layout.addRow(self.choices)
 
         self.ok_button = QPushButton("OK")
-        self.ok_button.clicked.connect(self.on_ok)
+        self.ok_button.setDefault(True)
+        self.ok_button.clicked.connect(self.accept)
         self.cancel_button = QPushButton("Cancel")
-        self.cancel_button.clicked.connect(self.on_cancel)
+        self.cancel_button.clicked.connect(self.reject)
         bottom_line_layout = QHBoxLayout()
         bottom_line_layout.addWidget(self.ok_button)
         bottom_line_layout.addWidget(self.cancel_button)
@@ -76,18 +74,11 @@ class DimensionDialog(QDialog):
 
         self.setLayout(layout)
 
-    @Slot()
-    def on_cancel(self):
-        self.hide()
+    def get_dimension_name(self):
+        return self.dimension_name.text()
 
-    def on_ok(self):
-        if self.parent_window.tab_widget.currentIndex() < 0:
-            msg_box = QMessageBox()
-            msg_box.setWindowTitle('Error')
-            msg_box.setText('Creating dimension is not possible without open document.')
-            msg_box.exec_()
-        else:
-            pass
+    def get_choices(self):
+        return self.choices.toPlainText().split("\n")
 
 
 class MainWindow(QMainWindow):
@@ -106,24 +97,26 @@ class MainWindow(QMainWindow):
         self.new_action = file_menu.addAction('New')
         self.new_action.setShortcut(QKeySequence.New)
         self.new_action.triggered.connect(self.on_new)
-        self.new_handler = None
         self.open_action = file_menu.addAction('Open')
         self.open_action.setShortcut(QKeySequence.Open)
         self.open_action.triggered.connect(self.on_open)
-        self.open_handler = None
         self.save_action = file_menu.addAction('Save')
         self.save_action.setShortcut(QKeySequence.Save)
         self.save_action.triggered.connect(self.on_save)
-        self.save_handler = None
         self.save_as_action = file_menu.addAction('Save As')
         self.save_as_action.setShortcut(QKeySequence.SaveAs)
         self.save_as_action.triggered.connect(self.on_save_as)
-        self.save_as_handler = None
         file_menu.addSeparator()
         self.close_action = file_menu.addAction('Close')
         self.close_action.setShortcut(QKeySequence.Close)
         self.close_action.triggered.connect(self.on_close)
+
+        self.new_handler = None
+        self.open_handler = None
+        self.save_handler = None
+        self.save_as_handler = None
         self.close_handler = None
+        self.add_dimension_handler = None
 
         self.menuBar().addMenu(file_menu)
 
@@ -158,7 +151,10 @@ class MainWindow(QMainWindow):
     def set_close_handler(self, handler):
         self.close_handler = handler
 
-    def setText(self, text):
+    def set_add_dimension_handler(self, handler):
+        self.dimension_dock.set_add_handler(handler)
+
+    def set_text(self, text):
         self.text_edit.setText(text)
 
     @Slot()
