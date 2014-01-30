@@ -46,10 +46,19 @@ class DimensionInstance:
         pass
 
 
-class CCFile:
-    def __init__(self):
+class File(QObject):
+    code_changed = Signal()
+    dimension_changed = Signal()
+
+    def __init__(self, filename=None):
+        super(File, self).__init__()
         self.dimensions = []
         self.code = ''
+        self.changed = False
+        self.filename = filename
 
     def load_from_file(self, filename):
         pass
+
+    def generate_output(self):
+        return self.code

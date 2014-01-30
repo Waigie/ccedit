@@ -18,20 +18,27 @@ class MainController(QObject):
         self.view.show()
 
         self.log = CCEdit.Models.Log()
-        self.log.log_update.connect(self._update_log_view)
+        self.log.log_update.connect(self._update_log)
+
+        self.file = CCEdit.Models.File()
 
         self.qt_app = qt_app
 
+        self.tab_dict = dict()
+
     @Slot()
-    def _update_log_view(self):
+    def _update_log(self):
         self.view.update_log_view(self.log.__str__())
 
     def new_action(self):
-        self.log.write('new action triggered')
+        self.file = CCEdit.Models.File()
+        self._updateView()
 
     def close_action(self):
-        self.log.write('close action triggered')
+        self.qt_app.exit()
 
+    def _updateView(self):
+        self.view.setText(self.file.generate_output())
 
 
 def main():

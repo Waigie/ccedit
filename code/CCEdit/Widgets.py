@@ -5,50 +5,12 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 
 
-class EditTab(QTextEdit):
-    def __init__(self, filename=None):
-        QTextEdit.__init__(self)
-        self.dimensions = []
-        self.setStyleSheet('font: 9pt "Courier";')
-        if filename:
-            self.__current_file = filename
-            self.__loadfile(filename)
-        else:
-            self.__current_file = None
-
-    def __loadfile(self, filename):
-        with open(filename, 'r') as file:
-            data = file.read()
-        self.setText(data)
-        self.__current_file = filename
-
-    def save(self):
-        if self.__current_file:
-            self.__save_to_file(self.__current_file)
-        else:
-            self.save_as()
-
-    def save_as(self):
-        filename = QFileDialog.getSaveFileName(None, "Save File", os.path.expanduser("~"),
-                                               "Python Choice Calculus (*.pycc);;All Files (*.*)")[0]
-        if filename:
-            self.__save_to_file(filename)
-            self.__current_file = filename
-
-    def get_filename(self):
-        return os.path.basename(self.__current_file)
-
-    def __save_to_file(self, filename):
-        with open(filename, 'w') as file:
-            file.write(self.toPlainText())
-
-
 class DimensionDock(QDockWidget):
     def __init__(self, parent_window):
         QDockWidget.__init__(self, "Dimensions", parent_window)
         self.parent_window = parent_window
 
-        self.setAllowedAreas(Qt.DockWidgetAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea))
+        #self.setAllowedAreas(Qt.DockWidgetAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea))
 
         self.central_widget = QWidget(self)
         self.setWidget(self.central_widget)
@@ -131,7 +93,7 @@ class DimensionDialog(QDialog):
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
-        self.setMinimumSize(QSize(640, 480))
+        self.setMinimumSize(QSize(1024, 768))
         self.setWindowTitle('CCEdit')
 
         self.central_widget = QWidget(self)
@@ -165,15 +127,18 @@ class MainWindow(QMainWindow):
 
         self.menuBar().addMenu(file_menu)
 
-        self.tab_widget = QTabWidget(self.central_widget)
-        self.tab_widget.setTabsClosable(True)
-        #self.tab_widget.tabCloseRequested.connect(self.on_close_tab)
-        layout.addWidget(self.tab_widget)
+        self.text_edit = QTextEdit(self)
+        self.text_edit.setStyleSheet("font: 10pt \"Courier\";")
+
+        layout.addWidget(self.text_edit)
 
         self.central_widget.setLayout(layout)
 
         self.log_dock = LogDock(self)
         self.addDockWidget(Qt.DockWidgetArea(Qt.BottomDockWidgetArea), self.log_dock)
+
+        self.dimension_dock = DimensionDock(self)
+        self.addDockWidget(Qt.DockWidgetArea(Qt.LeftDockWidgetArea), self.dimension_dock)
 
     def update_log_view(self, data):
         self.log_dock.set_data(data)
@@ -193,11 +158,14 @@ class MainWindow(QMainWindow):
     def set_close_handler(self, handler):
         self.close_handler = handler
 
+    def setText(self, text):
+        self.text_edit.setText(text)
+
     @Slot()
     def on_new(self):
         try:
             self.new_handler()
-        except Exception:
+        except TypeError:
             pass
 
     @Slot()
@@ -211,21 +179,21 @@ class MainWindow(QMainWindow):
     def on_save(self):
         try:
             self.save_handler()
-        except Exception:
+        except TypeError:
             pass
 
     @Slot()
     def on_save_as(self):
         try:
             self.save_as_handler()
-        except Exception:
+        except TypeError:
             pass
 
     @Slot()
     def on_close(self):
         try:
             self.close_handler()
-        except Exception:
+        except TypeError:
             pass
 
 
@@ -233,7 +201,7 @@ class LogDock(QDockWidget):
     def __init__(self, parent_window):
         QDockWidget.__init__(self, parent_window)
         self.setWindowTitle('Log')
-        self.setAllowedAreas(Qt.DockWidgetAreas(Qt.BottomDockWidgetArea))
+        #self.setAllowedAreas(Qt.DockWidgetAreas(Qt.BottomDockWidgetArea))
 
         self.text_edit = QTextEdit(self)
         self.text_edit.setReadOnly(True)
