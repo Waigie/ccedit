@@ -1,7 +1,6 @@
 __author__ = 'Christoph Weygand'
 
 import sys
-import os.path
 from PySide.QtCore import *
 from PySide.QtGui import *
 import CCEdit.Widgets
@@ -32,12 +31,12 @@ class MainController(QObject):
 
     def new_action(self):
         self.file = CCEdit.Models.File()
-        self._updateView()
+        self._update_view()
 
     def close_action(self):
         self.qt_app.exit()
 
-    def _updateView(self):
+    def _update_view(self):
         self.view.setText(self.file.generate_output())
 
 
