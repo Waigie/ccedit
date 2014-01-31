@@ -62,3 +62,12 @@ class File(QObject):
 
     def generate_output(self):
         return self.code
+
+    def add_dimension(self, name, choices):
+        self.dimensions.append(Dimension(name, choices))
+        self.dimension_changed.emit()
+
+    def disconnect(self):
+        QObject.disconnect()
+        self.code_changed.disconnect()
+        self.dimension_changed.disconnect()

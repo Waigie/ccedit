@@ -21,6 +21,7 @@ class MainController(QObject):
         self.log.log_update.connect(self._update_log)
 
         self.file = CCEdit.Models.File()
+        self.file.dimension_changed.connect(self.update_view)
 
         self.qt_app = qt_app
 
@@ -37,11 +38,17 @@ class MainController(QObject):
         if res == QDialog.Accepted:
             name = dialog.get_dimension_name()
             choices = dialog.get_choices()
-            print(choices)
+            self.file.add_dimension(name, choices)
 
+    @Slot()
+    def update_view(self):
+        pass
 
     def new_action(self):
+        self.file.disconnect()
         self.file = CCEdit.Models.File()
+        self.file.code_changed.connect(self.update_view)
+        self.file.dimension_changed.connect(self.update_view)
         self._update_view()
 
     def close_action(self):
