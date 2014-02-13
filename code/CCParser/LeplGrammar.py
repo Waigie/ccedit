@@ -31,12 +31,16 @@ codeSnippet, instance = Delayed(), Delayed()
 
 optSpaces = ~Space()[0:]
 identifier = Word(Upper(), (Upper() | Lower() | Digit())) > Identifier
-choice = ~Literal("{") & optSpaces & (instance | codeSnippet) & optSpaces & ~Literal("}") > Choice
+choice = optSpaces & (instance | codeSnippet) & optSpaces > Choice
 choices = choice & (~Literal(",") & optSpaces & choice)[1:] > Choices
 instance += identifier & ~Literal("<") & optSpaces & choices & optSpaces & ~Literal(">") > Instance
 codeSnippet += Word() > Code
 file = (instance | codeSnippet) & (optSpaces & (instance | codeSnippet))[:] > File
 
-result = file.parse('code Choice<{ Choice2< { a }, { b } >},{foo}> more code Choice3<{c},{d}>')[0]
-print(result)
 
+def parse(input_code):
+    result = file.parse(input_code)
+    if len(result) > 0:
+        return result[0]
+    else:
+        return None

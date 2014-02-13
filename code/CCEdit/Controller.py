@@ -15,13 +15,13 @@ class MainController(QObject):
         self.view.set_new_handler(self.new_action)
         self.view.set_close_handler(self.close_action)
         self.view.set_add_dimension_handler(self._add_dimension)
+        self.view.open_action.triggered.connect(self.open_action)
         self.view.show()
 
         self.log = CCEdit.Models.Log()
         self.log.log_update.connect(self._update_log)
 
-        self.file = CCEdit.Models.File()
-        self.file.dimension_changed.connect(self.update_view)
+        self.file = CCEdit.Models.File(self.log)
 
         self.qt_app = qt_app
 
@@ -42,20 +42,27 @@ class MainController(QObject):
 
     @Slot()
     def update_view(self):
-        pass
+        self.view.set_text(self.file.generate_output())
 
-    def new_action(self):
-        self.file.disconnect()
-        self.file = CCEdit.Models.File()
+    @Slot()
+    def open_action(self):
+        filename = QFileDialog.getOpenFileName(self.view, "Open File", "", "All Files (*.*)")
+        if filename[0]:
+            self.file = CCEdit.Models.File(self.log, filename[0])
+        else:
+            self.file = CCEdit.Models.File(self.log)
         self.file.code_changed.connect(self.update_view)
         self.file.dimension_changed.connect(self.update_view)
-        self._update_view()
+        self.update_view()
+
+    def new_action(self):
+        self.file = CCEdit.Models.File(self.log)
+        self.file.code_changed.connect(self.update_view)
+        self.file.dimension_changed.connect(self.update_view)
+        self.update_view()
 
     def close_action(self):
         self.qt_app.exit()
-
-    def _update_view(self):
-        self.view.set_text(self.file.generate_output())
 
 
 def main():

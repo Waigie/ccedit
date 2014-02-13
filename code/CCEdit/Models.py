@@ -3,6 +3,7 @@ __author__ = 'Waigie'
 import json
 import datetime
 from PySide.QtCore import *
+from CCParser.LeplGrammar import parse
 
 
 class Log(QObject):
@@ -50,15 +51,22 @@ class File(QObject):
     code_changed = Signal()
     dimension_changed = Signal()
 
-    def __init__(self, filename=None):
+    def __init__(self, log, filename=None):
         super(File, self).__init__()
         self.dimensions = []
         self.code = ''
         self.changed = False
         self.filename = filename
+        self.log = log
+        if self.filename:
+            self.load_from_file(self.filename)
 
     def load_from_file(self, filename):
-        pass
+        file = open(filename, 'r')
+        self.code = file.read()
+        result = parse(self.code)
+        if result:
+            self.log.write("Parser result:\n"+str(result[0]))
 
     def generate_output(self):
         return self.code
@@ -66,8 +74,3 @@ class File(QObject):
     def add_dimension(self, name, choices):
         self.dimensions.append(Dimension(name, choices))
         self.dimension_changed.emit()
-
-    def disconnect(self):
-        QObject.disconnect()
-        self.code_changed.disconnect()
-        self.dimension_changed.disconnect()
