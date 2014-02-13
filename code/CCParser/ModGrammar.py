@@ -8,11 +8,14 @@ class Identifier(Grammar):
 
 
 class Choice(Grammar):
-    grammar = (REPEAT(ANY, greedy=False))
+    grammar = (REF("CCCode"))
 
+
+class RChoices(Grammar):
+    grammar = (Choice, OPTIONAL((OPTIONAL(REPEAT(SPACE)), LITERAL(","), OPTIONAL(REPEAT(SPACE)), REF("RChoices"))))
 
 class Choices(Grammar):
-    grammar = (Choice, REPEAT((OPTIONAL(REPEAT(SPACE)), LITERAL(","), OPTIONAL(REPEAT(SPACE)), Choice), greedy=False))
+    grammar = (Choice, RChoices)
 
 
 class Instance(Grammar):
@@ -20,16 +23,13 @@ class Instance(Grammar):
 
 
 class Codeblock(Grammar):
-    grammar = (REPEAT(ANY))
+    grammar = (REPEAT(ANY, greedy=False))
 
 
 class CCCode(Grammar):
-    grammar = (REPEAT((Instance | Codeblock), greedy=False))
+    grammar = ((Instance | Codeblock), OPTIONAL(REF("CCCode")))
 
 
 parser = CCCode.parser()
-result = parser.parse_string(""
-                             "Choice<a,b>\n"
-                             "foobar\n"
-                             "Choice<c,d>")
-print(result.terminals())
+result = parser.parse_string("Choice<c,d>\nfoobar\nChoice<a,b>")
+print(result.elements)
