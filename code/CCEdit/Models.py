@@ -66,7 +66,7 @@ class File(QObject):
         self.code = file.read()
         result = parse(self.code)
         if result:
-            self.log.write("Parser result:\n"+str(result[0]))
+            self.log.write("Parser result:\n"+str(result))
 
     def generate_output(self):
         return self.code
