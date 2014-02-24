@@ -3,7 +3,7 @@ __author__ = 'Waigie'
 import json
 import datetime
 from PySide.QtCore import *
-from CCParser.LeplGrammar import parse
+from CCParser.Parser import LEPLParser
 
 
 class Log(QObject):
@@ -62,9 +62,10 @@ class File(QObject):
             self.load_from_file(self.filename)
 
     def load_from_file(self, filename):
+        parser = LEPLParser("#")
         file = open(filename, 'r')
         self.code = file.read()
-        result = parse(self.code)
+        result = parser.parse(self.code)
         if result:
             self.log.write("Parser result:\n"+str(result))
 
