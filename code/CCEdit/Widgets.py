@@ -3,6 +3,7 @@ __author__ = 'Waigie'
 import os.path
 from PySide.QtCore import *
 from PySide.QtGui import *
+from CCEdit.Services import CCHighlighter
 
 
 class DimensionDock(QDockWidget):
@@ -121,7 +122,9 @@ class MainWindow(QMainWindow):
         self.menuBar().addMenu(file_menu)
 
         self.text_edit = QTextEdit(self)
-        self.text_edit.setStyleSheet("font: 10pt \"Courier\";")
+        self.text_edit.setStyleSheet("font: 10pt \"Courier New\";")
+        self.text_edit.setWordWrapMode(QTextOption.NoWrap)
+        self.highlighter = CCHighlighter(self.text_edit, '#')
 
         layout.addWidget(self.text_edit)
 

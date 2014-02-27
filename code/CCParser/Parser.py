@@ -1,7 +1,5 @@
 __author__ = 'Christoph Weygand'
 
-from logging import basicConfig, DEBUG
-basicConfig(level=DEBUG)
 from lepl import *
 
 
@@ -37,22 +35,22 @@ class LEPLParser:
     def __init__(self, choice_marker):
 
         #tokens
-        self.word = Token("[A-Za-z0-9_]+")
-        self.value = Token(UnsignedReal())
-        self.symbol = Token("[^0-9A-Za-z\{\} \t\r\n"+choice_marker+"]")
-        self.number = Optional(self.symbol('-')) + self.value
-        self.c_bracket = Token("[\{\}]")
-        self.choice_marker = Token(choice_marker)
+        self.t_word = Token("[A-Za-z0-9_]+")
+        self.t_abracket = Token("[<>]")
+        self.t_choice_marker = Token(choice_marker)
+        self.t_value = Token(UnsignedReal())
+        self.t_symbol = Token("[^"+choice_marker+"0-9A-Za-z<> \t\r\n]")
+        self.t_number = Optional(self.t_symbol('-')) + self.t_value
+        self.t_comma = Token(",")
 
         self.code, self.choice = Delayed(), Delayed()
 
-        self.identifier = self.word > DimensionName
-        self.alternative = ~self.choice_marker & self.code > Alternative
-        self.alternatives = self.alternative[2:, ~self.symbol(",")] > Alternatives
-        self.choice += ~self.choice_marker & self.identifier & ~self.symbol("<") & self.alternatives & ~self.symbol(">") > Choice
-        self.code_snippet = (self.word | self.number | self.symbol) > CodeSnippet
-        self.code_block = ~self.c_bracket("{") & (self.choice | self.code_snippet)[:] & ~self.c_bracket("}") > CodeBlock
-        self.code += (self.choice | self.code_snippet | self.code_block)[1:] > Code
+        self.identifier = self.t_word > DimensionName
+        self.alternative = ~self.t_choice_marker & self.code > Alternative
+        self.alternatives = self.alternative[2:, ~self.t_comma] > Alternatives
+        self.choice += ~self.t_choice_marker & self.identifier & ~self.t_abracket("<") & self.alternatives & ~self.t_abracket(">") > Choice
+        self.code_snippet = (self.t_word | self.t_number | self.t_symbol)
+        self.code += (self.choice | self.code_snippet)[1:] > Code
 
     def parse(self, input):
         result = self.code.parse(input)

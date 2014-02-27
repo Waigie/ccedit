@@ -1,1 +1,2 @@
-Parameter< {x}, {y}, {z} >):
+def twice(#Parameter< #x, #y, #z >):
+    return #Implementation< ##Parameter<#x, #y, #z>+#Parameter< #x, #y, #z >, #2*#Parameter< #x, #y, #z > >
