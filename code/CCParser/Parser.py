@@ -42,14 +42,15 @@ class LEPLParser:
         self.t_symbol = Token("[^"+choice_marker+"0-9A-Za-z<> \t\r\n]")
         self.t_number = Optional(self.t_symbol('-')) + self.t_value
         self.t_comma = Token(",")
-
+        self.t_newline = Token("\r?\n")
+        self.t_tab = Token("\t")
         self.code, self.choice = Delayed(), Delayed()
 
         self.identifier = self.t_word > DimensionName
         self.alternative = ~self.t_choice_marker & self.code > Alternative
         self.alternatives = self.alternative[2:, ~self.t_comma] > Alternatives
         self.choice += ~self.t_choice_marker & self.identifier & ~self.t_abracket("<") & self.alternatives & ~self.t_abracket(">") > Choice
-        self.code_snippet = (self.t_word | self.t_number | self.t_symbol)
+        self.code_snippet = (self.t_word | self.t_number | self.t_symbol | self.t_newline | self.t_tab)
         self.code += (self.choice | self.code_snippet)[1:] > Code
 
     def parse(self, input):
