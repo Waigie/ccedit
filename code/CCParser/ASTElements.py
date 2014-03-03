@@ -5,7 +5,7 @@ from lepl import List
 
 class CCList(List):
     def choices(self):
-        pass
+        return []
 
 
 class DimensionName(CCList):
@@ -15,19 +15,40 @@ class DimensionName(CCList):
 
 class Choice(CCList):
     def name(self):
-        return self[0]
+        return self[0][0]
 
     def alternatives(self):
-        return self[0:]
+        return self[1]
+
+    def choices(self):
+        rtn = [self]
+        rtn += self.alternatives().choices()
+        return rtn
+
+    def __hash__(self):
+        return hash(self.name())
+
+    def __str__(self):
+        return self.name()
 
 
 class Alternatives(CCList):
-    pass
+    def choices(self):
+        rtn = []
+        for element in map(lambda alternative: alternative.choices(), self):
+            rtn += element
+        return rtn
 
 
 class Alternative(CCList):
-    pass
+    def choices(self):
+        return self[0].choices()
 
 
 class Code(CCList):
-    pass
+    def choices(self):
+        rtn = []
+        for element in self:
+            if isinstance(element, CCList):
+                rtn += element.choices()
+        return list(set(rtn))

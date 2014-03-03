@@ -58,6 +58,7 @@ class File(QObject):
         self.changed = False
         self.filename = filename
         self.log = log
+        self.parse_result = None
         if self.filename:
             self.load_from_file(self.filename)
 
@@ -65,9 +66,10 @@ class File(QObject):
         parser = LEPLParser("#")
         file = open(filename, 'r')
         self.code = file.read()
-        result = parser.parse(self.code)
-        if result:
-            self.log.write("Parser result:\n"+str(result))
+        self.parse_result = parser.parse(self.code)
+        if self.parse_result:
+            self.log.write("Parser result:\n"+str(self.parse_result))
+            self.log.write("Choices: "+str(self.parse_result.choices()))
 
     def generate_output(self):
         return self.code

@@ -25,8 +25,8 @@ class LEPLParser:
         self.code_snippet = (self.t_word | self.t_number | self.t_symbol | self.t_newline | self.t_tab)
         self.code += (self.choice | self.code_snippet)[1:] > Code
 
-    def parse(self, input):
-        result = self.code.parse(input)
+    def parse(self, code):
+        result = self.code.parse(code)
         if len(result) > 0:
             return result[0]
         else:
