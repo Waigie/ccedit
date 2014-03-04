@@ -1,7 +1,7 @@
 __author__ = 'Christoph Weygand'
 
 from lepl import *
-from CCParser.ASTElements import *
+from CCLang.ASTElements import *
 
 
 class LEPLParser:

@@ -20,6 +20,9 @@ class Choice(CCList):
     def alternatives(self):
         return self[1]
 
+    def alternative_count(self):
+        return len(self[1])
+
     def choices(self):
         rtn = [self]
         rtn += self.alternatives().choices()

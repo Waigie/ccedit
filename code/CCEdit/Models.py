@@ -3,7 +3,7 @@ __author__ = 'Waigie'
 import json
 import datetime
 from PySide.QtCore import *
-from CCParser.Parser import LEPLParser
+from CCLang.Parser import LEPLParser
 
 
 class Log(QObject):
@@ -73,6 +73,9 @@ class File(QObject):
 
     def generate_output(self):
         return self.code
+
+    def get_parser_result(self):
+        return self.parse_result
 
     def add_dimension(self, name, choices):
         self.dimensions.append(Dimension(name, choices))

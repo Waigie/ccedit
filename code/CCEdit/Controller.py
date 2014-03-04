@@ -43,6 +43,9 @@ class MainController(QObject):
     @Slot()
     def update_view(self):
         self.view.set_text(self.file.generate_output())
+        choices = self.file.get_parser_result().choices()
+        self.view.set_choices(choices)
+
 
     @Slot()
     def open_action(self):

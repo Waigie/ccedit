@@ -8,7 +8,7 @@ from CCEdit.Services import CCHighlighter
 
 class DimensionDock(QDockWidget):
     def __init__(self, parent_window):
-        QDockWidget.__init__(self, "Dimensions", parent_window)
+        QDockWidget.__init__(self, "Choices", parent_window)
         self.parent_window = parent_window
 
         #self.setAllowedAreas(Qt.DockWidgetAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea))
@@ -21,7 +21,7 @@ class DimensionDock(QDockWidget):
 
         self.table_widget = QTableWidget()
         self.table_widget.setSelectionMode(QAbstractItemView.NoSelection)
-        self.table_widget.setColumnCount(4)
+        self.table_widget.setColumnCount(2)
         self.table_widget.horizontalHeader().setResizeMode(QHeaderView.Stretch)
         self.table_widget.horizontalHeader().setVisible(False)
         self.table_widget.verticalHeader().setVisible(False)
@@ -31,7 +31,7 @@ class DimensionDock(QDockWidget):
 
         self.add_button = QPushButton("Add dimension")
         #self.add_button.clicked.connect(self.add_handler)
-        layout.addWidget(self.add_button)
+        #layout.addWidget(self.add_button)
         self.central_widget.setLayout(layout)
 
         self.dialog = None
@@ -194,6 +194,16 @@ class MainWindow(QMainWindow):
             self.close_handler()
         except TypeError:
             pass
+
+    def set_choices(self, choices):
+        self.dimension_dock.table_widget.setRowCount(len(choices))
+        for i in range(len(choices)):
+            label = QTableWidgetItem()
+            label.setText(choices[i].name())
+            self.dimension_dock.table_widget.setItem(i, 0, label)
+            combobox = QComboBox()
+            combobox.addItems(['No Selection']+list(map(lambda x: str(x+1), range(choices[i].alternative_count()))))
+            self.dimension_dock.table_widget.setCellWidget(i, 1, combobox)
 
 
 class LogDock(QDockWidget):
