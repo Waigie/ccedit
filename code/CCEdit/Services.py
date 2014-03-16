@@ -3,6 +3,7 @@ __author__ = 'Waigie'
 from PySide.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont
 from PySide.QtCore import *
 import re
+import logging
 
 
 class CCHighlighter(QSyntaxHighlighter):
@@ -38,6 +39,18 @@ class CCHighlighter(QSyntaxHighlighter):
 
 
         self.setCurrentBlockState(state)
+
+
+class Logger(logging.Handler):
+
+    def __init__(self, container):
+        logging.Handler.__init__(self)
+        self.container = container
+
+    def emit(self, record):
+        msg = self.format(record)
+        self.container.print(msg)
+        print(self.format(record))
 
 
 

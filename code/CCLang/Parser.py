@@ -2,6 +2,8 @@ __author__ = 'Christoph Weygand'
 
 from lepl import *
 from CCLang.ASTElements import *
+from logging import basicConfig, DEBUG
+basicConfig(level=DEBUG)
 
 
 class LEPLParser:

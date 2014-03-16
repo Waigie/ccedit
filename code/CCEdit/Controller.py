@@ -3,8 +3,10 @@ __author__ = 'Christoph Weygand'
 import sys
 from PySide.QtCore import *
 from PySide.QtGui import *
+import logging
 import CCEdit.Widgets
 import CCEdit.Models
+import CCEdit.Services
 
 
 class MainController(QObject):
@@ -14,12 +16,18 @@ class MainController(QObject):
         self.view = view
         self.view.set_new_handler(self.new_action)
         self.view.set_close_handler(self.close_action)
-        self.view.set_add_dimension_handler(self._add_dimension)
+        #self.view.set_add_dimension_handler(self._add_dimension)
         self.view.open_action.triggered.connect(self.open_action)
+        self.view.text_edit.textChanged.connect(self.code_changed)
         self.view.show()
 
-        self.log = CCEdit.Models.Log()
-        self.log.log_update.connect(self._update_log)
+        logHandler = CCEdit.Services.Logger(self.view.log_dock)
+        formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s', '%H:%M:%S')
+        logHandler.setFormatter(formatter)
+        self.log = logging.getLogger('CCEdit')
+        self.log.addHandler(logHandler)
+        self.log.setLevel(logging.INFO)
+        self.log.info("CCEdit stated")
 
         self.file = CCEdit.Models.File(self.log)
 
@@ -32,20 +40,8 @@ class MainController(QObject):
         self.view.update_log_view(self.log.__str__())
 
     @Slot()
-    def _add_dimension(self):
-        dialog = CCEdit.Widgets.DimensionDialog(self.view)
-        res = dialog.exec_()
-        if res == QDialog.Accepted:
-            name = dialog.get_dimension_name()
-            choices = dialog.get_choices()
-            self.file.add_dimension(name, choices)
-
-    @Slot()
     def update_view(self):
         self.view.set_text(self.file.generate_output())
-        choices = self.file.get_parser_result().choices()
-        self.view.set_choices(choices)
-
 
     @Slot()
     def open_action(self):
@@ -54,11 +50,11 @@ class MainController(QObject):
             self.file = CCEdit.Models.File(self.log, filename[0])
         else:
             self.file = CCEdit.Models.File(self.log)
-        self.file.code_changed.connect(self.update_view)
-        self.file.dimension_changed.connect(self.update_view)
+        self.log.info("Open file: %s", filename[0])
         self.update_view()
 
     def new_action(self):
+        self.log.info("New file")
         self.file = CCEdit.Models.File(self.log)
         self.file.code_changed.connect(self.update_view)
         self.file.dimension_changed.connect(self.update_view)
@@ -66,6 +62,14 @@ class MainController(QObject):
 
     def close_action(self):
         self.qt_app.exit()
+
+    @Slot()
+    def code_changed(self):
+        self.file.code = self.view.text_edit.toPlainText()
+
+    @Slot()
+    def simplify_action(self):
+        pass
 
 
 def main():

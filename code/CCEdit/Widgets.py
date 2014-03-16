@@ -119,7 +119,12 @@ class MainWindow(QMainWindow):
         self.close_handler = None
         self.add_dimension_handler = None
 
+        action_menu = QMenu("Action")
+        self.simplify_action = action_menu.addAction('Simplify')
+        self.merge_action = action_menu.addAction('Merge')
+
         self.menuBar().addMenu(file_menu)
+        self.menuBar().addMenu(action_menu)
 
         self.text_edit = QTextEdit(self)
         self.text_edit.setStyleSheet("font: 10pt \"Courier New\";")
@@ -133,8 +138,8 @@ class MainWindow(QMainWindow):
         self.log_dock = LogDock(self)
         self.addDockWidget(Qt.DockWidgetArea(Qt.BottomDockWidgetArea), self.log_dock)
 
-        self.dimension_dock = DimensionDock(self)
-        self.addDockWidget(Qt.DockWidgetArea(Qt.LeftDockWidgetArea), self.dimension_dock)
+        #self.dimension_dock = DimensionDock(self)
+        #self.addDockWidget(Qt.DockWidgetArea(Qt.LeftDockWidgetArea), self.dimension_dock)
 
     def update_log_view(self, data):
         self.log_dock.set_data(data)
@@ -216,7 +221,5 @@ class LogDock(QDockWidget):
         self.text_edit.setReadOnly(True)
         self.setWidget(self.text_edit)
 
-    def set_data(self, data):
-        self.text_edit.setText(data)
-        scrollbar = self.text_edit.verticalScrollBar()
-        scrollbar.setValue(scrollbar.maximum())
+    def print(self, data):
+        self.text_edit.append(data)
