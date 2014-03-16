@@ -2,13 +2,13 @@ __author__ = 'Christoph Weygand'
 
 from lepl import *
 from CCLang.ASTElements import *
-from logging import basicConfig, DEBUG
+from logging import basicConfig, DEBUG, INFO
 basicConfig(level=DEBUG)
 
 
 class LEPLParser:
     def __init__(self, choice_marker):
-
+        #log = getLogger('lepl')
         #tokens
         self.t_word = Token("[A-Za-z0-9_]+")
         self.t_choice_marker = Token(choice_marker)

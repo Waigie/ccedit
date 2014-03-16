@@ -6,82 +6,6 @@ from PySide.QtGui import *
 from CCEdit.Services import CCHighlighter
 
 
-class DimensionDock(QDockWidget):
-    def __init__(self, parent_window):
-        QDockWidget.__init__(self, "Choices", parent_window)
-        self.parent_window = parent_window
-
-        #self.setAllowedAreas(Qt.DockWidgetAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea))
-
-        self.central_widget = QWidget(self)
-        self.setWidget(self.central_widget)
-
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        self.table_widget = QTableWidget()
-        self.table_widget.setSelectionMode(QAbstractItemView.NoSelection)
-        self.table_widget.setColumnCount(2)
-        self.table_widget.horizontalHeader().setResizeMode(QHeaderView.Stretch)
-        self.table_widget.horizontalHeader().setVisible(False)
-        self.table_widget.verticalHeader().setVisible(False)
-        self.table_widget.verticalHeader().setResizeMode(QHeaderView.Fixed)
-        self.table_widget.verticalHeader().setDefaultSectionSize(20)
-        layout.addWidget(self.table_widget)
-
-        self.add_button = QPushButton("Add dimension")
-        #self.add_button.clicked.connect(self.add_handler)
-        #layout.addWidget(self.add_button)
-        self.central_widget.setLayout(layout)
-
-        self.dialog = None
-
-    def set_add_handler(self, handler):
-        self.add_button.clicked.connect(handler)
-
-    @Slot()
-    def on_add_dimension(self):
-        self.dialog = DimensionDialog(self.parent_window)
-        self.dialog.show()
-
-
-class DimensionDialog(QDialog):
-    def __init__(self, parent_window):
-        QDialog.__init__(self, parent_window)
-        self.parent_window = parent_window
-        self.setWindowTitle('New dimension')
-        self.setMinimumSize(QSize(300, 200))
-        self.setMaximumSize(QSize(300, 200))
-
-        layout = QFormLayout()
-
-        self.dimension_name = QLineEdit()
-        layout.addRow("Dimension", self.dimension_name)
-
-        self.choices = QTextEdit()
-        layout.addRow(QLabel("Choices (on per line)"))
-        layout.addRow(self.choices)
-
-        self.ok_button = QPushButton("OK")
-        self.ok_button.setDefault(True)
-        self.ok_button.clicked.connect(self.accept)
-        self.cancel_button = QPushButton("Cancel")
-        self.cancel_button.clicked.connect(self.reject)
-        bottom_line_layout = QHBoxLayout()
-        bottom_line_layout.addWidget(self.ok_button)
-        bottom_line_layout.addWidget(self.cancel_button)
-
-        layout.addRow(bottom_line_layout)
-
-        self.setLayout(layout)
-
-    def get_dimension_name(self):
-        return self.dimension_name.text()
-
-    def get_choices(self):
-        return self.choices.toPlainText().split("\n")
-
-
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
@@ -209,6 +133,47 @@ class MainWindow(QMainWindow):
             combobox = QComboBox()
             combobox.addItems(['No Selection']+list(map(lambda x: str(x+1), range(choices[i].alternative_count()))))
             self.dimension_dock.table_widget.setCellWidget(i, 1, combobox)
+
+
+class SimplifyWindow(QDialog):
+    def __init__(self, parent, choices):
+        QDialog.__init__(self, parent)
+        self.setFixedSize(400, 400)
+        self.setWindowTitle("Generate Simplified Source")
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        table_view = QTableWidget(self)
+        table_view.setSelectionMode(QAbstractItemView.NoSelection)
+        table_view.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        table_view.horizontalHeader().setVisible(False)
+        table_view.verticalHeader().setVisible(False)
+        table_view.verticalHeader().setResizeMode(QHeaderView.Fixed)
+        table_view.verticalHeader().setDefaultSectionSize(20)
+        table_view.setColumnCount(2)
+        table_view.setRowCount(len(choices))
+        row = 0
+        for choice in choices:
+            table_view.setItem(row, 0, QTableWidgetItem(choice.name()))
+            combobox = QComboBox()
+            combobox.addItems(['No Selection']+list(map(lambda x: str(x+1), range(choice.alternative_count()))))
+            table_view.setCellWidget(row, 1, combobox)
+            row += 1
+
+        layout.addWidget(table_view)
+
+        button_box = QWidget(self)
+        #button_box.setFixedHeight(50)
+        button_box_layout = QHBoxLayout()
+        self.simplify_button = QPushButton('Simplify')
+        self.abort_button = QPushButton('Abort')
+        button_box_layout.addWidget(self.simplify_button)
+        button_box_layout.addWidget(self.abort_button)
+        button_box.setLayout(button_box_layout)
+
+        layout.addWidget(button_box)
+
+        self.setLayout(layout)
 
 
 class LogDock(QDockWidget):

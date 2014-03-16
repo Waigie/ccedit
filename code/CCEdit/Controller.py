@@ -7,6 +7,7 @@ import logging
 import CCEdit.Widgets
 import CCEdit.Models
 import CCEdit.Services
+import CCLang.Parser
 
 
 class MainController(QObject):
@@ -19,14 +20,15 @@ class MainController(QObject):
         #self.view.set_add_dimension_handler(self._add_dimension)
         self.view.open_action.triggered.connect(self.open_action)
         self.view.text_edit.textChanged.connect(self.code_changed)
+        self.view.simplify_action.triggered.connect(self.simplify_action)
         self.view.show()
 
         logHandler = CCEdit.Services.Logger(self.view.log_dock)
         formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s', '%H:%M:%S')
         logHandler.setFormatter(formatter)
-        self.log = logging.getLogger('CCEdit')
+        self.log = logging.getLogger()
         self.log.addHandler(logHandler)
-        self.log.setLevel(logging.INFO)
+        self.log.setLevel(logging.DEBUG)
         self.log.info("CCEdit stated")
 
         self.file = CCEdit.Models.File(self.log)
@@ -56,8 +58,6 @@ class MainController(QObject):
     def new_action(self):
         self.log.info("New file")
         self.file = CCEdit.Models.File(self.log)
-        self.file.code_changed.connect(self.update_view)
-        self.file.dimension_changed.connect(self.update_view)
         self.update_view()
 
     def close_action(self):
@@ -65,11 +65,23 @@ class MainController(QObject):
 
     @Slot()
     def code_changed(self):
+        self.file.changed = True
         self.file.code = self.view.text_edit.toPlainText()
 
     @Slot()
     def simplify_action(self):
-        pass
+        parser = CCLang.Parser.LEPLParser('#')
+        try:
+            result = parser.parse(self.file.code)
+        except:
+            self.log.error("Error while parsing source input")
+            return
+        self.log.info("Parsed source input")
+        self.log.info(result)
+        simplifyWidget = CCEdit.Widgets.SimplifyWindow(self.view, result.choices())
+        simplifyWidget.show()
+
+
 
 
 def main():

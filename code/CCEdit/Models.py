@@ -19,6 +19,7 @@ class File(QObject):
 
     def load_from_file(self, filename):
         file = open(filename, 'r')
+        self.changed = False
         self.code = file.read()
 
     def generate_output(self):
