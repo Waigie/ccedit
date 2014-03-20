@@ -62,6 +62,9 @@ class MainWindow(QMainWindow):
         self.log_dock = LogDock(self)
         self.addDockWidget(Qt.DockWidgetArea(Qt.BottomDockWidgetArea), self.log_dock)
 
+        self.dimension_dock = DimensionDock(self)
+        self.addDockWidget(Qt.DockWidgetArea(Qt.LeftDockWidgetArea), self.dimension_dock)
+
         #self.dimension_dock = DimensionDock(self)
         #self.addDockWidget(Qt.DockWidgetArea(Qt.LeftDockWidgetArea), self.dimension_dock)
 
@@ -188,3 +191,67 @@ class LogDock(QDockWidget):
 
     def print(self, data):
         self.text_edit.append(data)
+
+
+class DimensionDock(QDockWidget):
+    def __init__(self, parent_window):
+        QDockWidget.__init__(self, "Choices", parent_window)
+        self.parent_window = parent_window
+        self.central_widget = QWidget(self)
+        self.setWidget(self.central_widget)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.table_widget = QTableWidget()
+        self.table_widget.setSelectionMode(QAbstractItemView.NoSelection)
+        self.table_widget.setColumnCount(2)
+        self.table_widget.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        self.table_widget.horizontalHeader().setVisible(False)
+        self.table_widget.verticalHeader().setVisible(False)
+        self.table_widget.verticalHeader().setResizeMode(QHeaderView.Fixed)
+        self.table_widget.verticalHeader().setDefaultSectionSize(20)
+        layout.addWidget(self.table_widget)
+
+        self.add_button = QPushButton("Add dimension")
+        layout.addWidget(self.add_button)
+        self.central_widget.setLayout(layout)
+
+        self.dialog = None
+
+
+class DimensionDialog(QDialog):
+    def __init__(self, parent_window):
+        QDialog.__init__(self, parent_window)
+        self.parent_window = parent_window
+        self.setWindowTitle('New dimension')
+        self.setMinimumSize(QSize(300, 200))
+        self.setMaximumSize(QSize(300, 200))
+
+        layout = QFormLayout()
+
+        self.dimension_name = QLineEdit()
+        layout.addRow("Dimension", self.dimension_name)
+
+        self.choices = QTextEdit()
+        layout.addRow(QLabel("Choices (on per line)"))
+        layout.addRow(self.choices)
+
+        self.ok_button = QPushButton("OK")
+        self.ok_button.setDefault(True)
+        self.ok_button.clicked.connect(self.accept)
+        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button.clicked.connect(self.reject)
+        bottom_line_layout = QHBoxLayout()
+        bottom_line_layout.addWidget(self.ok_button)
+        bottom_line_layout.addWidget(self.cancel_button)
+
+        layout.addRow(bottom_line_layout)
+
+        self.setLayout(layout)
+
+    def get_dimension_name(self):
+        return self.dimension_name.text()
+
+    def get_choices(self):
+        return self.choices.toPlainText().split("\n")
