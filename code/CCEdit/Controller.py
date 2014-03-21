@@ -14,6 +14,8 @@ class MainController(QObject):
     def __init__(self, qt_app, view):
         super(MainController, self).__init__()
 
+        self.tree_model = CCEdit.Models.DimensionTree()
+
         self.view = view
         self.view.set_new_handler(self.new_action)
         self.view.set_close_handler(self.close_action)
@@ -21,6 +23,7 @@ class MainController(QObject):
         self.view.open_action.triggered.connect(self.open_action)
         self.view.text_edit.textChanged.connect(self.code_changed)
         self.view.simplify_action.triggered.connect(self.simplify_action)
+        self.view.dimension_dock.tree_view.setModel(self.tree_model)
         self.view.show()
 
         logHandler = CCEdit.Services.Logger(self.view.log_dock)
@@ -43,6 +46,17 @@ class MainController(QObject):
 
     @Slot()
     def update_view(self):
+        parser = CCLang.Parser.LEPLParser('#')
+        parser_result = parser.parse(self.file.code)
+        if parser_result:
+            self.tree_model = CCEdit.Models.DimensionTree()
+            dimensions = parser_result.choices()
+            for dimension in dimensions:
+                row = CCEdit.Models.TreeItem((dimension.name(), ''), self.tree_model.root_item)
+                for i in range(dimension.alternative_count()):
+                    row.append_child(CCEdit.Models.TreeItem((str(i+1), ''), row))
+                self.tree_model.append(row)
+            self.view.dimension_dock.tree_view.setModel(self.tree_model)
         self.view.set_text(self.file.generate_output())
 
     @Slot()
@@ -80,8 +94,6 @@ class MainController(QObject):
         self.log.info(result)
         simplifyWidget = CCEdit.Widgets.SimplifyWindow(self.view, result.choices())
         simplifyWidget.show()
-
-
 
 
 def main():

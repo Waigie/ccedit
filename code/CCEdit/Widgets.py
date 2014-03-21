@@ -65,9 +65,6 @@ class MainWindow(QMainWindow):
         self.dimension_dock = DimensionDock(self)
         self.addDockWidget(Qt.DockWidgetArea(Qt.LeftDockWidgetArea), self.dimension_dock)
 
-        #self.dimension_dock = DimensionDock(self)
-        #self.addDockWidget(Qt.DockWidgetArea(Qt.LeftDockWidgetArea), self.dimension_dock)
-
     def update_log_view(self, data):
         self.log_dock.set_data(data)
 
@@ -203,15 +200,13 @@ class DimensionDock(QDockWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.table_widget = QTableWidget()
-        self.table_widget.setSelectionMode(QAbstractItemView.NoSelection)
-        self.table_widget.setColumnCount(2)
-        self.table_widget.horizontalHeader().setResizeMode(QHeaderView.Stretch)
-        self.table_widget.horizontalHeader().setVisible(False)
-        self.table_widget.verticalHeader().setVisible(False)
-        self.table_widget.verticalHeader().setResizeMode(QHeaderView.Fixed)
-        self.table_widget.verticalHeader().setDefaultSectionSize(20)
-        layout.addWidget(self.table_widget)
+        self.tree_view = QTreeView()
+        # self.table_widget.setSelectionMode(QAbstractItemView.NoSelection)
+        # self.table_widget.setColumnCount(2)
+        # self.table_widget.verticalHeader().setVisible(False)
+        # self.table_widget.verticalHeader().setResizeMode(QHeaderView.Fixed)
+        # self.table_widget.verticalHeader().setDefaultSectionSize(20)
+        layout.addWidget(self.tree_view)
 
         self.add_button = QPushButton("Add dimension")
         layout.addWidget(self.add_button)
