@@ -27,7 +27,8 @@ class File(QObject):
 
 
 class TreeItem(object):
-    def __init__(self, data, parent=None):
+    def __init__(self, data, parent=None, type="alternative"):
+        self.type = type
         self.parent_item = parent
         self.item_data = data
         self.child_items = []

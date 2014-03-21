@@ -24,6 +24,7 @@ class MainController(QObject):
         self.view.text_edit.textChanged.connect(self.code_changed)
         self.view.simplify_action.triggered.connect(self.simplify_action)
         self.view.dimension_dock.tree_view.setModel(self.tree_model)
+        self.view.dimension_dock.tree_view.doubleClicked.connect(self.dimension_selected)
         self.view.show()
 
         logHandler = CCEdit.Services.Logger(self.view.log_dock)
@@ -52,7 +53,7 @@ class MainController(QObject):
             self.tree_model = CCEdit.Models.DimensionTree()
             dimensions = parser_result.choices()
             for dimension in dimensions:
-                row = CCEdit.Models.TreeItem((dimension.name(), ''), self.tree_model.root_item)
+                row = CCEdit.Models.TreeItem((dimension.name(), ''), self.tree_model.root_item, "dimension")
                 for i in range(dimension.alternative_count()):
                     row.append_child(CCEdit.Models.TreeItem((str(i+1), ''), row))
                 self.tree_model.append(row)
@@ -94,6 +95,10 @@ class MainController(QObject):
         self.log.info(result)
         simplifyWidget = CCEdit.Widgets.SimplifyWindow(self.view, result.choices())
         simplifyWidget.show()
+
+    @Slot()
+    def dimension_selected(self, index):
+        self.log.info("Doubleclicked on item: %s" % index.internalPointer().type)
 
 
 def main():

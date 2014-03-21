@@ -201,6 +201,7 @@ class DimensionDock(QDockWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.tree_view = QTreeView()
+        self.tree_view.setExpandsOnDoubleClick(False)
         # self.table_widget.setSelectionMode(QAbstractItemView.NoSelection)
         # self.table_widget.setColumnCount(2)
         # self.table_widget.verticalHeader().setVisible(False)
