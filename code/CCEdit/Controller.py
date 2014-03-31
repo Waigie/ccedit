@@ -23,7 +23,7 @@ class MainController(QObject):
         self.view.open_action.triggered.connect(self.open_action)
         self.view.text_edit.textChanged.connect(self.code_changed)
         self.view.simplify_action.triggered.connect(self.simplify_action)
-        self.view.dimension_dock.tree_view.setModel(self.tree_model)
+        #self.view.dimension_dock.tree_view.setModel(self.tree_model)
         self.view.dimension_dock.tree_view.doubleClicked.connect(self.dimension_selected)
         self.view.show()
 
@@ -50,14 +50,12 @@ class MainController(QObject):
         parser = CCLang.Parser.LEPLParser('#')
         parser_result = parser.parse(self.file.code)
         if parser_result:
-            self.tree_model = CCEdit.Models.DimensionTree()
             dimensions = parser_result.choices()
             for dimension in dimensions:
-                row = CCEdit.Models.TreeItem((dimension.name(), ''), self.tree_model.root_item, "dimension")
+                topLevelItem = CCEdit.Widgets.TopLevelTreeItem((dimension.name(), )[:1])
                 for i in range(dimension.alternative_count()):
-                    row.append_child(CCEdit.Models.TreeItem((str(i+1), ''), row))
-                self.tree_model.append(row)
-            self.view.dimension_dock.tree_view.setModel(self.tree_model)
+                    topLevelItem.addChild(QTreeWidgetItem((str(i+1), None)[:1]))
+                item = self.view.dimension_dock.tree_view.addTopLevelItem(topLevelItem)
         self.view.set_text(self.file.generate_output())
 
     @Slot()

@@ -64,7 +64,7 @@ class DimensionTree(QAbstractItemModel):
     def __init__(self, parent=None):
         super(DimensionTree, self).__init__(parent)
 
-        self.root_item = TreeItem(("Dimension", "Color"))
+        self.root_item = TreeItem(("Dimension", None))
         #self.setupModelData(data.split('\n'), self.root_item)
 
     def columnCount(self, parent):

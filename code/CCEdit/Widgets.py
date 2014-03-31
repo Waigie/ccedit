@@ -200,8 +200,9 @@ class DimensionDock(QDockWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.tree_view = QTreeView()
-        self.tree_view.setExpandsOnDoubleClick(False)
+        self.tree_view = QTreeWidget()
+        self.tree_view.setHeaderLabel('Dimensions')
+        #self.tree_view.setExpandsOnDoubleClick(False)
         # self.table_widget.setSelectionMode(QAbstractItemView.NoSelection)
         # self.table_widget.setColumnCount(2)
         # self.table_widget.verticalHeader().setVisible(False)
@@ -214,6 +215,11 @@ class DimensionDock(QDockWidget):
         self.central_widget.setLayout(layout)
 
         self.dialog = None
+
+
+class TopLevelTreeItem(QTreeWidgetItem):
+    def __init__(self, data):
+        QTreeWidgetItem.__init__(self, data)
 
 
 class DimensionDialog(QDialog):
