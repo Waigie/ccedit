@@ -3,11 +3,12 @@ __author__ = 'Christoph Weygand'
 import sys
 from PySide.QtCore import *
 from PySide.QtGui import *
-import logging
 import CCEdit.Widgets
 import CCEdit.Models
 import CCEdit.Services
 import CCLang.Parser
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 
 class MainController(QObject):

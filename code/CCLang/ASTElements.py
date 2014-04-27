@@ -5,10 +5,16 @@ from lepl import List
 
 class CCList(List):
     def choices(self):
-        return []
+        raise NotImplementedError
+
+    def pretty_print(self, choices, meta_marker):
+        raise NotImplementedError
 
 
 class DimensionName(CCList):
+    def pretty_print(self, choices, meta_marker):
+        return ' '+meta_marker+str(self)
+
     def __str__(self):
         return self[0]
 
@@ -28,6 +34,18 @@ class Choice(CCList):
         rtn += self.alternatives().choices()
         return rtn
 
+    def pretty_print(self, choices, meta_marker):
+        rtn = ''
+        if self.name() in choices:
+            pass
+        else:
+            rtn += meta_marker+self.name()+self.alternatives().pretty_print(
+                choices,
+                meta_marker,
+                print_children=range(self.alternative_count())
+            )
+        return rtn
+
     def __hash__(self):
         return hash(self.name())
 
@@ -42,10 +60,26 @@ class Alternatives(CCList):
             rtn += element
         return rtn
 
+    def pretty_print(self, choices, meta_marker, print_children=[]):
+        rtn = ''
+        if len(print_children) == 1:
+            pass
+        else:
+            children = (meta_marker+', ').join(
+                map(
+                    lambda y: y.pretty_print(choices, meta_marker),
+                    map(lambda x: self[x], print_children))
+            )
+            rtn += ('< %s'+meta_marker+'> ') % children
+        return rtn
+
 
 class Alternative(CCList):
     def choices(self):
         return self[0].choices()
+
+    def pretty_print(self, choices, meta_marker):
+        return self[0].pretty_print(choices, meta_marker)
 
 
 class Code(CCList):
@@ -55,3 +89,12 @@ class Code(CCList):
             if isinstance(element, CCList):
                 rtn += element.choices()
         return list(set(rtn))
+
+    def pretty_print(self, choices, meta_marker):
+        rtn = ''
+        for element in self:
+            if isinstance(element, CCList):
+                rtn += element.pretty_print(choices, meta_marker)
+            else:
+                rtn += element+' '
+        return rtn
