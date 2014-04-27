@@ -36,8 +36,18 @@ class Choice(CCList):
 
     def pretty_print(self, choices, meta_marker):
         rtn = ''
-        if self.name() in choices:
-            pass
+        if self.name() in choices and len(choices[self.name()]) == 1:
+            if choices[self.name()][0] > self.alternative_count():
+                raise ValueError
+            rtn += self.alternatives()[choices[self.name()][0]].pretty_print(choices, meta_marker)
+        elif self.name() in choices and len(choices[self.name()]) > 1:
+            if max(choices[self.name()]) > self.alternative_count():
+                raise ValueError
+            rtn += meta_marker+self.name()+self.alternatives().pretty_print(
+                choices,
+                meta_marker,
+                print_children=choices[self.name()]
+            )
         else:
             rtn += meta_marker+self.name()+self.alternatives().pretty_print(
                 choices,
