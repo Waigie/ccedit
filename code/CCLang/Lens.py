@@ -12,7 +12,8 @@ def choice(config, oldast, newast, alt_counts=None):
     if len(config.keys()) == 0:
         return newast
     else:
-        dim, sel = config.popitem()
+        dim = sorted(config.keys())[0]
+        sel = config.pop(dim)
         if len(sel) != 1:
             raise ValueError
         sel = sel[0]
@@ -21,44 +22,39 @@ def choice(config, oldast, newast, alt_counts=None):
 
         for i in range(alt_counts[dim]):
             if i != sel:
-                alternatives.append(oldast)
+                alternatives.append(Alternative([oldast]))
             else:
-                alternatives.append(choice(config, oldast, newast, alt_counts))
+                alternatives.append(Alternative([choice(config, oldast, newast, alt_counts)]))
 
-        rtn = Code([Choice([dim, alternatives])])
+        rtn = Code([Choice([DimensionName([dim]), alternatives])])
 
         return rtn
 
 
 def minimize(ast, selects={}):
     if isinstance(ast, Code):
-        return Code(map(lambda elem: minimize(elem, selects), ast))
+        inner = list(map(lambda elem: minimize(elem, selects), ast))
+        return Code(inner)
     elif isinstance(ast, Choice) and not (ast.name() in selects.keys()):
         alternatives = Alternatives()
         for i in range(ast.alternative_count()):
-            tmp = copy.copy(selects);
+            tmp = copy.copy(selects)
             tmp[ast.name()] = i
-            alternatives.append(minimize(ast.alternatives()[i], tmp))
-        return Choice([ast.name(), alternatives])
+            inner = minimize(ast.alternatives()[i], tmp)
+            alternatives.append(inner)
+        return Choice([DimensionName([ast.name()]), alternatives])
     elif isinstance(ast, Choice) and ast.name() in selects.keys():
         selected = selects[ast.name()]
-        return minimize(ast.alternatives()[selected], selects)
+        inner = minimize(ast.alternatives()[selected][0][0], selects)
+        return inner
+    elif isinstance(ast, Alternative):
+        inner = minimize(ast[0], selects)
+        rtn = Alternative()
+        rtn.append(inner)
+        return rtn
     else:
         return ast
 
 
-simple_ast = Code([
-    Choice([DimensionName(['A']),
-            Alternatives([
-                Alternative([Code(['1'])]),
-                Alternative([Code(['2'])]),
-            ])
-    ])
-])
-
-newast = choice({'A': [1]}, simple_ast, Code(['3']))
-print(newast.pretty_print({}, "#"))
-newast = minimize(newast)
-
-print(newast.pretty_print({}, "#"))
-
+def update(config, oldast, newast):
+    return minimize(choice(config, oldast, newast))
