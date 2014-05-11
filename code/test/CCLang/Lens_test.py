@@ -46,77 +46,77 @@ class TestCCLangLens(unittest.TestCase):
             ["1",       {"A": [0]},         "2",       "#A< 2 #, 1 #>"]
         ]
 
-    # def test_ast1_change_left(self):
-    #     expected = self.parser.parse("#A< 3 #, 2 #>")
-    #     new_ast = CCLang.Lens.update({"A": [0]}, self.ast1, Code("3"))
-    #     self.assertEqual(new_ast, expected)
-    #
-    # def test_ast1_change_right(self):
-    #     expected = self.parser.parse("#A< 1 #, 3 #>")
-    #     new_ast = CCLang.Lens.update({"A": [1]}, self.ast1, Code("3"))
-    #     self.assertEqual(new_ast, expected)
-    #
-    # def test_ast1_change_left_to_choice(self):
-    #     expected = self.parser.parse("#A< #B< 8 #, 9 #> #, 2 #>")
-    #     new_ast = CCLang.Lens.update({"A": [0]}, self.ast1, self.to_choice_ast)
-    #     self.assertEqual(new_ast, expected)
-    #
-    # def test_ast1_change_right_to_choice(self):
-    #     expected = Code([
-    #         Choice([DimensionName(["A"]), Alternatives([
-    #                 Alternative([Code(["1"])]),
-    #                 Alternative([self.to_choice_ast])
-    #         ])])
-    #     ])
-    #
-    #     new_ast = CCLang.Lens.update({"A": [1]}, self.ast1, self.to_choice_ast)
-    #     self.assertEqual(new_ast, expected)
-    #
-    # def test_ast2_change_left(self):
-    #     expected = self.parser.parse("#A< 4 #, #B< 2 #, 3 #> #>")
-    #     new_ast = CCLang.Lens.update({"A": [0]}, self.ast2, Code(["4"]))
-    #     self.assertEqual(new_ast, expected)
-    #
-    # def test_ast2_change_left_to_choice(self):
-    #     expected = self.parser.parse("#A< #B< 8 #, 9 #> #, #B< 2 #, 3 #> #>")
-    #     new_ast = CCLang.Lens.update({"A": [0]}, self.ast2, self.to_choice_ast)
-    #     self.assertEqual(new_ast, expected)
-    #
-    # def test_ast2_change_2_selects(self):
-    #     expected = self.parser.parse("#A< 1 #, #B< 4 #, 3 #> #>")
-    #     new_ast = CCLang.Lens.update({"A": [1], "B": [0]}, self.ast2, Code(["4"]))
-    #     self.assertEqual(new_ast, expected)
-    #
-    # def test_ast2_change_2_selects2(self):
-    #     expected = self.parser.parse("#A< 1 #, #B< 2 #, 4 #> #>")
-    #     new_ast = CCLang.Lens.update({"A": [1], "B": [1]}, self.ast2, Code(["4"]))
-    #     self.assertEqual(new_ast, expected)
-    #
-    # def test_ast3_change1(self):
-    #     expected = self.parser.parse("#A< #B< 5 #, 2 #> #, #B< 3 #, 4 #> #>")
-    #     new_ast = CCLang.Lens.update({"A": [0], "B": [0]}, self.ast3, Code(["5"]))
-    #     self.assertEqual(new_ast, expected)
-    #
-    # def test_ast3_change2(self):
-    #     expected = self.parser.parse("#A< #B< 1 #, 5 #> #, #B< 3 #, 4 #> #>")
-    #     new_ast = CCLang.Lens.update({"A": [0], "B": [1]}, self.ast3, Code(["5"]))
-    #     self.assertEqual(new_ast, expected)
-    #
-    # def test_ast3_change3(self):
-    #     expected = self.parser.parse("#A< #B< 1 #, 2 #> #, #B< 5 #, 4 #> #>")
-    #     new_ast = CCLang.Lens.update({"A": [1], "B": [0]}, self.ast3, Code(["5"]))
-    #     self.assertEqual(new_ast, expected)
-    #
-    # def test_ast3_change4(self):
-    #     expected = self.parser.parse("#A< #B< 1 #, 2 #> #, #B< 3 #, 5 #> #>")
-    #     new_ast = CCLang.Lens.update({"A": [1], "B": [1]}, self.ast3, Code(["5"]))
-    #     self.assertEqual(new_ast, expected)
+    def test_ast1_change_left(self):
+        expected = self.parser.parse("#A< 3 #, 2 #>")
+        new_ast = CCLang.Lens.update({"A": [0]}, self.ast1, Code("3"))
+        self.assertEqual(new_ast, expected)
 
-    # def test_subs(self):
-    #     for old, config, new, expected_src in self.subs:
-    #         expected = self.parser.parse(expected_src)
-    #         new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
-    #         self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
+    def test_ast1_change_right(self):
+        expected = self.parser.parse("#A< 1 #, 3 #>")
+        new_ast = CCLang.Lens.update({"A": [1]}, self.ast1, Code("3"))
+        self.assertEqual(new_ast, expected)
+
+    def test_ast1_change_left_to_choice(self):
+        expected = self.parser.parse("#A< #B< 8 #, 9 #> #, 2 #>")
+        new_ast = CCLang.Lens.update({"A": [0]}, self.ast1, self.to_choice_ast)
+        self.assertEqual(new_ast, expected)
+
+    def test_ast1_change_right_to_choice(self):
+        expected = Code([
+            Choice([DimensionName(["A"]), Alternatives([
+                    Alternative([Code(["1"])]),
+                    Alternative([self.to_choice_ast])
+            ])])
+        ])
+
+        new_ast = CCLang.Lens.update({"A": [1]}, self.ast1, self.to_choice_ast)
+        self.assertEqual(new_ast, expected)
+
+    def test_ast2_change_left(self):
+        expected = self.parser.parse("#A< 4 #, #B< 2 #, 3 #> #>")
+        new_ast = CCLang.Lens.update({"A": [0]}, self.ast2, Code(["4"]))
+        self.assertEqual(new_ast, expected)
+
+    def test_ast2_change_left_to_choice(self):
+        expected = self.parser.parse("#A< #B< 8 #, 9 #> #, #B< 2 #, 3 #> #>")
+        new_ast = CCLang.Lens.update({"A": [0]}, self.ast2, self.to_choice_ast)
+        self.assertEqual(new_ast, expected)
+
+    def test_ast2_change_2_selects(self):
+        expected = self.parser.parse("#A< 1 #, #B< 4 #, 3 #> #>")
+        new_ast = CCLang.Lens.update({"A": [1], "B": [0]}, self.ast2, Code(["4"]))
+        self.assertEqual(new_ast, expected)
+
+    def test_ast2_change_2_selects2(self):
+        expected = self.parser.parse("#A< 1 #, #B< 2 #, 4 #> #>")
+        new_ast = CCLang.Lens.update({"A": [1], "B": [1]}, self.ast2, Code(["4"]))
+        self.assertEqual(new_ast, expected)
+
+    def test_ast3_change1(self):
+        expected = self.parser.parse("#A< #B< 5 #, 2 #> #, #B< 3 #, 4 #> #>")
+        new_ast = CCLang.Lens.update({"A": [0], "B": [0]}, self.ast3, Code(["5"]))
+        self.assertEqual(new_ast, expected)
+
+    def test_ast3_change2(self):
+        expected = self.parser.parse("#A< #B< 1 #, 5 #> #, #B< 3 #, 4 #> #>")
+        new_ast = CCLang.Lens.update({"A": [0], "B": [1]}, self.ast3, Code(["5"]))
+        self.assertEqual(new_ast, expected)
+
+    def test_ast3_change3(self):
+        expected = self.parser.parse("#A< #B< 1 #, 2 #> #, #B< 5 #, 4 #> #>")
+        new_ast = CCLang.Lens.update({"A": [1], "B": [0]}, self.ast3, Code(["5"]))
+        self.assertEqual(new_ast, expected)
+
+    def test_ast3_change4(self):
+        expected = self.parser.parse("#A< #B< 1 #, 2 #> #, #B< 3 #, 5 #> #>")
+        new_ast = CCLang.Lens.update({"A": [1], "B": [1]}, self.ast3, Code(["5"]))
+        self.assertEqual(new_ast, expected)
+
+    def test_subs(self):
+        for old, config, new, expected_src in self.subs:
+            expected = self.parser.parse(expected_src)
+            new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
+            self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
 
     def test_implict(self):
         for old, config, new, expected_src in self.implict:
