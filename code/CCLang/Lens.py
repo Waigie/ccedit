@@ -8,6 +8,11 @@ def choice(config, oldast, newast, alt_counts=None):
         alt_counts = {}
         for elm in oldast.choices():
             alt_counts[elm.name()] = elm.alternative_count()
+        for elem in newast.choices():
+            if not (elem.name() in alt_counts):
+                alt_counts[elem.name()] = elem.alternative_count()
+            elif alt_counts[elem.name()] < elem.alternative_count():
+                alt_counts[elem.name()] = elem.alternative_count()
 
     if len(config.keys()) == 0:
         return newast
@@ -20,7 +25,7 @@ def choice(config, oldast, newast, alt_counts=None):
 
         alternatives = Alternatives()
 
-        for i in range(alt_counts[dim]):
+        for i in range(alt_counts.get(dim, 0)):
             if i != sel:
                 alternatives.append(Alternative([oldast]))
             else:
