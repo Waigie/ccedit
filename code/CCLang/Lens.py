@@ -14,6 +14,9 @@ def choice(config, oldast, newast, alt_counts=None):
             elif alt_counts[elem.name()] < elem.alternative_count():
                 alt_counts[elem.name()] = elem.alternative_count()
 
+    for k in config.keys():
+        alt_counts[k] = max(alt_counts.get(k, 0), 2)
+
     if len(config.keys()) == 0:
         return newast
     else:

@@ -40,19 +40,22 @@ class TestCCLangLens(unittest.TestCase):
             ["#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>",  {"B": [1]}, "#A<5 #, 6 #>", "#A< #B< 1 #, 5 #> #, #B<3 #, 6 #> #>"],
         ]
 
-        """
-        testCase "1"                "A.l"     "1"      "2"      "A<2,1>",
-        testCase "1"                "A.r"     "1"      "2"      "A<1,2>",
-        testCase "1"                "A.l,B.l" "1"      "2"      "A<B<2,1>,1>",
-        testCase "1"                "A.l,B.r" "1"      "2"      "A<B<1,2>,1>",
-        testCase "1"                "A.r,B.l" "1"      "2"      "A<1,B<2,1>>",
-        testCase "1"                "A.r,B.r" "1"      "2"      "A<1,B<1,2>>",
-        testCase "A<1,B<2,3>>"      "B.l"     "A<1,2>" "A<4,5>" "A<B<4,1>,B<5,3>>", -- was: A<4,B<5,3>>
-        testCase "A<1,B<2,3>>"      "B.r"     "A<1,3>" "A<4,5>" "A<B<1,4>,B<2,5>>"]
-        """
         self.implict = [
-            #["1",       {"A": [0]},         "2",       "#A< 2 #, 1 #>"]
-            #["#A< 1 #, 2 #> + #B< 3 #, 4 #>", {"A":[0], "B":[0]}, "a+b", "1"]
+            ["1",                            {"A": [0]},           "2",              "#A< 2 #, 1 #>"],
+            ["1",                            {"A": [1]},           "2",              "#A< 1 #, 2 #>"],
+            ["1",                            {"A": [0], "B": [0]}, "2",              "#A< #B< 2 #, 1 #> #, 1 #>"],
+            ["1",                            {"A": [0], "B": [1]}, "2",              "#A< #B< 1 #, 2 #> #, 1 #>"],
+            ["1",                            {"A": [1], "B": [0]}, "2",              "#A< 1 #, #B< 2 #, 1 #> #>"],
+            ["1",                            {"A": [1], "B": [1]}, "2",              "#A< 1 #, #B< 1 #, 2 #> #>"],
+            ["#A< 1 #, #B< 2 #, 3 #> #>",    {"B": [0]},           "#A< 4 #, 5 #>",  "#A< #B< 4 #, 1 #> #, #B< 5 #, 3 #> #>"],
+            ["#A< 1 #, #B< 2 #, 3 #> #>",    {"B": [1]},           "#A< 4 #, 5 #>",  "#A< #B< 1 #, 4 #> #, #B< 2 #, 5 #> #>"],
+        ]
+
+        self.tricky = [
+            ["#A< 1 #, #B< 2 #, 3 #> #>",               {"B": [0]},   "4",    "#B< 4 #, #A< 1 #, 3 #> #>"],
+            ["#A< 1 #, #B< 2 #, 3 #> #>",               {"B": [1]},   "4",    "#B< #A< 1 #, 2 #> #, 4 #>"],
+            ["#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>",   {"B": [0]},   "5",    "#A< #B< 5 #, 2 #> #, #B< 5 #, 4 #> #>"],
+            ["#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>",   {"B": [1]},   "5",    "#A< #B< 1 #, 5 #> #, #B< 3 #, 5 #> #>"],
         ]
 
     def test_leaves(self):
@@ -73,3 +76,8 @@ class TestCCLangLens(unittest.TestCase):
             new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
             self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
 
+    def test_tricky(self):
+        for old, config, new, expected_src in self.tricky:
+            expected = self.parser.parse(expected_src)
+            new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
+            self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
