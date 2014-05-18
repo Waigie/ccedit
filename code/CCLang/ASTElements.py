@@ -3,6 +3,20 @@ __author__ = 'Waigie'
 from lepl import List
 
 
+def configs(choices):
+    if choices:
+        current = choices.pop()
+        rtn = []
+        for config in configs(choices):
+            for i in range(current[1]):
+                tmp = config.copy()
+                tmp[current[0]] = [i]
+                rtn.append(tmp)
+        return rtn
+    else:
+        return [{}]
+
+
 class CCList(List):
     def choices(self):
         raise NotImplementedError
@@ -11,9 +25,15 @@ class CCList(List):
         raise NotImplementedError
 
     def __eq__(self, other):
-        choices_a = self.choices()
-        choices_b = other.choices()
-        return choices_a == choices_b
+        choices_a = list(set(map(lambda x: (x.name(), x.alternative_count()), self.choices())))
+        choices_b = list(set(map(lambda x: (x.name(), x.alternative_count()), other.choices())))
+        if choices_a == choices_b:
+            for config in configs(choices_a):
+                if self.pretty_print(config, '#') != other.pretty_print(config, '#'):
+                    return False
+            return True
+        else:
+            return False
 
 
 class DimensionName(CCList):

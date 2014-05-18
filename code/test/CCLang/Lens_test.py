@@ -3,7 +3,7 @@ __author__ = 'Waigie'
 import unittest
 import CCLang.Parser
 import CCLang.Lens
-from CCLang.ASTElements import *
+
 
 class TestCCLangLens(unittest.TestCase):
     def setUp(self):
@@ -13,6 +13,21 @@ class TestCCLangLens(unittest.TestCase):
         self.ast3 = self.parser.parse("#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>")
 
         self.to_choice_ast = self.parser.parse('#B< 8 #, 9 #>')
+
+        self.leaves = [
+            ["#A< 1 #, 2 #>",                          {"A": [0]},           "3",            "#A< 3 #, 2 #>"],
+            ["#A< 1 #, 2 #>",                          {"A": [1]},           "3",            "#A< 1 #, 3 #>"],
+            ["#A< 1 #, 2 #>",                          {"A": [0]},           "#B<3 #, 4 #>", "#A< #B<3 #, 4 #> #, 2 #>"],
+            ["#A< 1 #, 2 #>",                          {"A": [1]},           "#B<3 #, 4 #>", "#A< 1 #, #B< 3 #, 4 #> #>"],
+            ["#A< 1 #, #B< 2 #, 3 #> #>",              {"A": [0]},           "4",            "#A< 4 #, #B< 2 #, 3 #> #>"],
+            ["#A< 1 #, #B< 2 #, 3 #> #>",              {"A": [0]},           "#B<4 #, 5 #>", "#A< #B<4 #, 5 #> #, #B< 2 #, 3 #> #>"],
+            ["#A< 1 #, #B< 2 #, 3 #> #>",              {"A": [1], "B": [0]}, "4",            "#A< 1 #, #B< 4 #, 3 #> #>"],
+            ["#A< 1 #, #B< 2 #, 3 #> #>",              {"A": [1], "B": [1]}, "4",            "#A< 1 #, #B< 2 #, 4 #> #>"],
+            ["#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>",  {"A": [0], "B": [0]}, "5",            "#A< #B< 5 #, 2 #> #, #B< 3 #, 4 #> #>"],
+            ["#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>",  {"A": [0], "B": [1]}, "5",            "#A< #B< 1 #, 5 #> #, #B< 3 #, 4 #> #>"],
+            ["#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>",  {"A": [1], "B": [0]}, "5",            "#A< #B< 1 #, 2 #> #, #B< 5 #, 4 #> #>"],
+            ["#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>",  {"A": [1], "B": [1]}, "5",            "#A< #B< 1 #, 2 #> #, #B< 3 #, 5 #> #>"],
+        ]
 
         self.subs = [
             ["#A< 1 #, #B< 2 #, 3 #> #>",              {"A": [1]}, "4",            "#A< 1 #, 4 #>"],
@@ -24,12 +39,6 @@ class TestCCLangLens(unittest.TestCase):
             ["#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>",  {"B": [0]}, "#A<5 #, 6 #>", "#A< #B< 5 #, 2 #> #, #B<6 #, 4 #> #>"],
             ["#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>",  {"B": [1]}, "#A<5 #, 6 #>", "#A< #B< 1 #, 5 #> #, #B<3 #, 6 #> #>"],
         ]
-        """
-        Haskell result from last test mirrors python result, what is wrong?
-        update (Config [("B", True)]) (readCC "A<B<1,2>,B<3,4>>") (readCC "A<5,6>")
-        B<A<5,6>,A<2,4>>
-        """
-
 
         """
         testCase "1"                "A.l"     "1"      "2"      "A<2,1>",
@@ -43,15 +52,14 @@ class TestCCLangLens(unittest.TestCase):
         """
         self.implict = [
             #["1",       {"A": [0]},         "2",       "#A< 2 #, 1 #>"]
-            ["#A< 1 #, 2 #> + #B< 3 #, 4 #>", {"A":[0], "B":[0]}, "a+b", "1"]
+            #["#A< 1 #, 2 #> + #B< 3 #, 4 #>", {"A":[0], "B":[0]}, "a+b", "1"]
         ]
 
-
-    def test_ast1_change_left(self):
-        expected = self.parser.parse("#A< 3 #, 2 #>")
-        new_ast = CCLang.Lens.update({"A": [0]}, self.ast1, Code("3"))
-        self.assertEqual(new_ast, expected)
-
+    def test_leaves(self):
+        for old, config, new, expected_src in self.leaves:
+            expected = self.parser.parse(expected_src)
+            new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
+            self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
 
     def test_subs(self):
         for old, config, new, expected_src in self.subs:
@@ -59,9 +67,9 @@ class TestCCLangLens(unittest.TestCase):
             new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
             self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
 
-    # def test_implict(self):
-    #     for old, config, new, expected_src in self.implict:
-    #         expected = self.parser.parse(expected_src)
-    #         new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
-    #         self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
+    def test_implict(self):
+        for old, config, new, expected_src in self.implict:
+            expected = self.parser.parse(expected_src)
+            new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
+            self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
 
