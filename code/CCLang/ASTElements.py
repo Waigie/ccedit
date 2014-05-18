@@ -10,6 +10,11 @@ class CCList(List):
     def pretty_print(self, choices, meta_marker):
         raise NotImplementedError
 
+    def __eq__(self, other):
+        choices_a = self.choices()
+        choices_b = other.choices()
+        return choices_a == choices_b
+
 
 class DimensionName(CCList):
     def pretty_print(self, choices, meta_marker):

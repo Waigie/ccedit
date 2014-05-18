@@ -27,9 +27,9 @@ def choice(config, oldast, newast, alt_counts=None):
 
         for i in range(alt_counts.get(dim, 0)):
             if i != sel:
-                alternatives.append(Alternative([oldast]))
+                alternatives.append(oldast)
             else:
-                alternatives.append(Alternative([choice(config, oldast, newast, alt_counts)]))
+                alternatives.append(choice(config, oldast, newast, alt_counts))
 
         rtn = Code([Choice([DimensionName([dim]), alternatives])])
 
@@ -50,16 +50,12 @@ def minimize(ast, selects={}):
         return Choice([DimensionName([ast.name()]), alternatives])
     elif isinstance(ast, Choice) and ast.name() in selects.keys():
         selected = selects[ast.name()]
-        inner = minimize(ast.alternatives()[selected][0][0], selects)
+        inner = minimize(ast.alternatives()[selected][0], selects)
         return inner
-    elif isinstance(ast, Alternative):
-        inner = minimize(ast[0], selects)
-        rtn = Alternative()
-        rtn.append(inner)
-        return rtn
     else:
         return ast
 
 
 def update(config, oldast, newast):
     return minimize(choice(config, oldast, newast))
+

@@ -18,7 +18,7 @@ class LEPLParser:
         self.code, self.choice = Delayed(), Delayed()
 
         self.identifier = self.t_word > DimensionName
-        self.alternative = self.code > Alternative
+        self.alternative = self.code #> Alternative
         self.alternatives = self.alternative[2:, ~(self.t_meta_marker & self.t_symbol(","))] > Alternatives
         self.choice += ~self.t_meta_marker & self.identifier & ~self.t_symbol("<") & self.alternatives \
             & ~self.t_meta_marker & ~self.t_symbol(">") > Choice
