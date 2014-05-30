@@ -111,12 +111,12 @@ class Alternatives(CCList):
         return rtn
 
 
-class Alternative(CCList):
-    def choices(self):
-        return self[0].choices()
-
-    def pretty_print(self, choices, meta_marker):
-        return self[0].pretty_print(choices, meta_marker)
+# class Alternative(CCList):
+#     def choices(self):
+#         return self[0].choices()
+#
+#     def pretty_print(self, choices, meta_marker):
+#         return self[0].pretty_print(choices, meta_marker)
 
 
 class Code(CCList):

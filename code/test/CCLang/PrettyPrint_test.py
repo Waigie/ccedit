@@ -11,24 +11,24 @@ class TestPrettyPrint(unittest.TestCase):
         self.simple_ast = Code([
             Choice([DimensionName(['A']),
                     Alternatives([
-                        Alternative([Code(['1'])]),
-                        Alternative([Code(['2'])]),
-                        Alternative([Code(['3'])]),
+                        Code(['1']),
+                        Code(['2']),
+                        Code(['3']),
                     ])
                 ])
         ])
         self.complex_ast = Code([Choice([DimensionName(['A']),
                 Alternatives([
-                    Alternative([Code(['1'])]),
-                    Alternative([Code([
+                    Code(['1']),
+                    Code([
                         Choice([
                             DimensionName(['B']),
                             Alternatives([
-                                Alternative([Code(['2'])]),
-                                Alternative([Code(['3'])]),
+                                Code(['2']),
+                                Code(['3']),
                             ])
                         ])
-                    ])])
+                    ])
                 ])
         ])])
 
