@@ -1,10 +1,12 @@
-Refactoring:
-	* seperatte configuration and pretty printing
-	* equivalence (structural and semantic)
-	* equiv should not use prettyprinting
+####Refactoring
 
-Testing:
-	* add tests to check increase/decrease dimension arity
+* separate configuration and pretty printing - __Done__
+* equivalence (structural and semantic) - __Done__
+* equiv should not use prettyprinting - __Done__
 
-Furture:
-	+ GUI
+####Testing
+
+* add tests to check increase/decrease dimension arity
+
+####Furture:
+* GUI

@@ -18,19 +18,19 @@ class TestCCLangLens(unittest.TestCase):
     def test_ast1_change_left(self):
         expected = self.parser.parse("#A< 3 #, #A< 1 #, 2 #> #>")
         new_ast = CCLang.Lens.choice({"A": [0]}, self.ast1, Code(["3"]))
-        self.assertEqual(expected, new_ast)
+        self.assertTrue(expected.equiv(new_ast))
 
     def test_ast1_change_right(self):
         expected = self.parser.parse("#A< #A< 1 #, 2 #> #, 3 #>")
         new_ast = CCLang.Lens.choice({"A": [1]}, self.ast1, Code(["3"]))
-        self.assertEqual(expected, new_ast)
+        self.assertTrue(expected.equiv(new_ast))
 
     def test_ast1_change_left_to_choice(self):
         expected = self.parser.parse("#A< #B< 8 #, 9 #> #, #A< 1 #, 2 #> #>")
         new_ast = CCLang.Lens.choice({"A": [0]}, self.ast1, self.to_choice_ast)
-        self.assertEqual(expected, new_ast)
+        self.assertTrue(expected.equiv(new_ast))
 
     def test_ast1_change_right_to_choice(self):
         expected = self.parser.parse("#A< #A< 1 #, 2 #> #, #B< 8 #, 9 #> #>")
         new_ast = CCLang.Lens.choice({"A": [1]}, self.ast1, self.to_choice_ast)
-        self.assertEqual(expected, new_ast)
+        self.assertTrue(expected.equiv(new_ast))

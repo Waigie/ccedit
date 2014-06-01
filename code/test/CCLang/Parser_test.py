@@ -35,11 +35,11 @@ class TestCCLangParser(unittest.TestCase):
 
     def test_no_meta_language(self):
         result = self.parser.parse('void testFunction() {}')
-        self.assertEqual(result, self.only_code_ast)
+        self.assertTrue(self.only_code_ast.equiv(result))
 
     def test_simple_cc(self):
         result = self.parser.parse('#A<1#,2#,3#>')
-        self.assertEqual(result, self.simple_ast)
+        self.assertTrue(self.simple_ast.equiv(result))
 
     def test_nested_cc(self):
         result = self.parser.parse('#A< 1 #, #B< 2 #, 3 #> #>')

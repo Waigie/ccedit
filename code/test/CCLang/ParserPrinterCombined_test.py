@@ -37,18 +37,18 @@ class TestParserPrinterCombined(unittest.TestCase):
 
     def test_combined_code(self):
         ast = self.only_code_ast
-        print_result = ast.pretty_print({}, '#')
+        print_result = ast.apply_and_print({}, '#')
         result = self.parser.parse(print_result)
-        self.assertEqual(ast, result)
+        self.assertTrue(ast.equiv(result))
 
     def test_combined_simple_cc(self):
         ast = self.simple_ast
-        print_result = ast.pretty_print({}, '#')
+        print_result = ast.apply_and_print({}, '#')
         result = self.parser.parse(print_result)
-        self.assertEqual(ast, result)
+        self.assertTrue(ast.equiv(result))
 
     def test_combined_nested_cc(self):
         ast = self.complex_ast
-        print_result = ast.pretty_print({}, '#')
+        print_result = ast.apply_and_print({}, '#')
         result = self.parser.parse(print_result)
-        self.assertEqual(ast, result)
+        self.assertTrue(ast.equiv(result))

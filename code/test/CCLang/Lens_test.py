@@ -62,22 +62,22 @@ class TestCCLangLens(unittest.TestCase):
         for old, config, new, expected_src in self.leaves:
             expected = self.parser.parse(expected_src)
             new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
-            self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
+            self.assertTrue(expected.equiv(new_ast), "Got %s expected %s" % (new_ast.apply_and_print({}, "#"), expected_src))
 
     def test_subs(self):
         for old, config, new, expected_src in self.subs:
             expected = self.parser.parse(expected_src)
             new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
-            self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
+            self.assertTrue(expected.equiv(new_ast), "Got %s expected %s" % (new_ast.apply_and_print({}, "#"), expected_src))
 
     def test_implict(self):
         for old, config, new, expected_src in self.implict:
             expected = self.parser.parse(expected_src)
             new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
-            self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
+            self.assertTrue(expected.equiv(new_ast), "Got %s expected %s" % (new_ast.apply_and_print({}, "#"), expected_src))
 
     def test_tricky(self):
         for old, config, new, expected_src in self.tricky:
             expected = self.parser.parse(expected_src)
             new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
-            self.assertEqual(new_ast, expected, "Got %s expected %s" % (new_ast.pretty_print({}, "#"), expected_src))
+            self.assertTrue(expected.equiv(new_ast), "Got %s expected %s" % (new_ast.apply_and_print({}, "#"), expected_src))
