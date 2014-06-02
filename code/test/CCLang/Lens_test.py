@@ -58,6 +58,11 @@ class TestCCLangLens(unittest.TestCase):
             ["#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>",   {"B": [1]},   "5",    "#A< #B< 1 #, 5 #> #, #B< 3 #, 5 #> #>"],
         ]
 
+        self.arity = [
+            ["#A< 1 #, 2 #>",               {},   "#A< 1 #, 2 #, 3 #>",    "#A< 1 #, 2 #, 3 #>"],
+            ["#A< 1 #, 2 #, 3#>",           {},   "#A< 1 #, 2 #>",         "#A< 1 #, 2 #>"],
+        ]
+
     def test_leaves(self):
         for old, config, new, expected_src in self.leaves:
             expected = self.parser.parse(expected_src)
@@ -78,6 +83,12 @@ class TestCCLangLens(unittest.TestCase):
 
     def test_tricky(self):
         for old, config, new, expected_src in self.tricky:
+            expected = self.parser.parse(expected_src)
+            new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
+            self.assertTrue(expected.equiv(new_ast), "Got %s expected %s" % (new_ast.apply_and_print({}, "#"), expected_src))
+
+    def test_arity(self):
+        for old, config, new, expected_src in self.arity:
             expected = self.parser.parse(expected_src)
             new_ast = CCLang.Lens.update(config, self.parser.parse(old), self.parser.parse(new))
             self.assertTrue(expected.equiv(new_ast), "Got %s expected %s" % (new_ast.apply_and_print({}, "#"), expected_src))

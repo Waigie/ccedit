@@ -33,13 +33,14 @@ class CCList(List):
     def equiv(self, other):
         choices_a = list(set(map(lambda x: (x.name(), x.alternative_count()), self.choices())))
         choices_b = list(set(map(lambda x: (x.name(), x.alternative_count()), other.choices())))
-        if choices_a == choices_b:
-            for config in configs(choices_a):
-                if self.apply_config(config) != other.apply_config(config):
-                    return False
-            return True
-        else:
-            return False
+        choices = list(set(choices_a + choices_b))
+        # if choices_a == choices_b:
+        for config in configs(choices):
+            if self.apply_config(config) != other.apply_config(config):
+                return False
+        return True
+        # else:
+        #     return False
 
 
 class DimensionName(CCList):
