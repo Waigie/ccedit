@@ -1,110 +1,75 @@
 __author__ = 'Christoph Weygand'
 
-import sys
-from PySide.QtCore import *
-from PySide.QtGui import *
-import CCEdit.Widgets
-import CCEdit.Models
-import CCEdit.Services
-import CCLang.Parser
-import logging
-logging.basicConfig(level=logging.DEBUG)
+from PySide.QtCore import QObject, Slot
+from PySide.QtGui import QFileDialog, QApplication
+from CCEdit.Models import ApplicationState
 
 
 class MainController(QObject):
-    def __init__(self, qt_app, view):
-        super(MainController, self).__init__()
+    def __init__(self, view):
+        super(MainController, self).__init__(view)
 
-        self.tree_model = CCEdit.Models.DimensionTree()
-
+        self.state = None
         self.view = view
-        self.view.set_new_handler(self.new_action)
-        self.view.set_close_handler(self.close_action)
-        #self.view.set_add_dimension_handler(self._add_dimension)
-        self.view.open_action.triggered.connect(self.open_action)
-        self.view.text_edit.textChanged.connect(self.code_changed)
-        self.view.simplify_action.triggered.connect(self.simplify_action)
-        #self.view.dimension_dock.tree_view.setModel(self.tree_model)
-        self.view.dimension_dock.tree_view.doubleClicked.connect(self.dimension_selected)
+        self.set_view_handler()
         self.view.show()
+        self.new_handler()
 
-        logHandler = CCEdit.Services.Logger(self.view.log_dock)
-        formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s', '%H:%M:%S')
-        logHandler.setFormatter(formatter)
-        self.log = logging.getLogger()
-        self.log.addHandler(logHandler)
-        self.log.setLevel(logging.DEBUG)
-        self.log.info("CCEdit stated")
-
-        self.file = CCEdit.Models.File(self.log)
-
-        self.qt_app = qt_app
-
-        self.tab_dict = dict()
+    def set_view_handler(self):
+        self.view.new_action.triggered.connect(self.new_handler)
+        self.view.open_action.triggered.connect(self.open_handler)
+        self.view.save_action.triggered.connect(self.save_handler)
+        self.view.save_as_action.triggered.connect(self.save_as_handler)
+        self.view.close_action.triggered.connect(self.close_handler)
+        self.view.text_edit.textChanged.connect(self.text_change_handler)
 
     @Slot()
-    def _update_log(self):
-        self.view.update_log_view(self.log.__str__())
+    def new_handler(self):
+        self.state = ApplicationState()
+        self.view.set_text(self.state.code)
+        self.view.set_title(self.state.filename, self.state.changed)
 
     @Slot()
-    def update_view(self):
-        parser = CCLang.Parser.LEPLParser('#')
-        parser_result = parser.parse(self.file.code)
-        if parser_result:
-            dimensions = parser_result.dims()
-            for dimension in dimensions:
-                topLevelItem = CCEdit.Widgets.TopLevelTreeItem((dimension.name(), )[:1])
-                for i in range(dimension.alternative_count()):
-                    topLevelItem.addChild(QTreeWidgetItem((str(i+1), None)[:1]))
-                item = self.view.dimension_dock.tree_view.addTopLevelItem(topLevelItem)
-        self.view.set_text(self.file.generate_output())
-
-    @Slot()
-    def open_action(self):
+    def open_handler(self):
         filename = QFileDialog.getOpenFileName(self.view, "Open File", "", "All Files (*.*)")
         if filename[0]:
-            self.file = CCEdit.Models.File(self.log, filename[0])
+            self.state = ApplicationState()
+            self.state.filename = filename[0]
+            file = open(filename[0])
+            self.state.code = file.read()
+            file.close()
+            self.view.set_text(self.state.code)
+            self.view.set_title(self.state.filename, self.state.changed)
+
+    @Slot()
+    def save_handler(self):
+        if self.state.filename:
+            file = open(self.state.filename, mode="w")
+            file.write(self.state.code)
+            file.close()
+            self.state.changed = False
+            self.view.set_title(self.state.filename, self.state.changed)
         else:
-            self.file = CCEdit.Models.File(self.log)
-        self.log.info("Open file: %s", filename[0])
-        self.update_view()
-
-    def new_action(self):
-        self.log.info("New file")
-        self.file = CCEdit.Models.File(self.log)
-        self.update_view()
-
-    def close_action(self):
-        self.qt_app.exit()
+            self.save_as_handler()
+        pass
 
     @Slot()
-    def code_changed(self):
-        self.file.changed = True
-        self.file.code = self.view.text_edit.toPlainText()
+    def save_as_handler(self):
+        filename = QFileDialog.getSaveFileName()
+        if filename[0]:
+            file = open(filename[0], mode="w")
+            file.write(self.state.code)
+            file.close()
+            self.state.filename = filename[0]
+            self.state.changed = False
+            self.view.set_title(self.state.filename, self.state.changed)
 
     @Slot()
-    def simplify_action(self):
-        parser = CCLang.Parser.LEPLParser('#')
-        try:
-            result = parser.parse(self.file.code)
-        except:
-            self.log.error("Error while parsing source input")
-            return
-        self.log.info("Parsed source input")
-        self.log.info(result)
-        simplifyWidget = CCEdit.Widgets.SimplifyWindow(self.view, result.dims())
-        simplifyWidget.show()
+    def close_handler(self):
+        QApplication.exit()
 
     @Slot()
-    def dimension_selected(self, index):
-        self.log.info("Doubleclicked on item: %s" % index.internalPointer().type)
+    def text_change_handler(self):
+        self.state.update_text(self.view.text_edit.toPlainText())
+        self.view.set_title(self.state.filename, self.state.changed)
 
-
-def main():
-    qt_app = QApplication(sys.argv)
-    main_window = CCEdit.Widgets.MainWindow()
-    MainController(qt_app, main_window)
-    qt_app.exec_()
-
-if __name__ == '__main__':
-    main()
