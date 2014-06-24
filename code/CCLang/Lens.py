@@ -6,9 +6,9 @@ import copy
 def choice(config, oldast, newast, alt_counts=None):
     if alt_counts is None:
         alt_counts = {}
-        for elm in oldast.choices():
+        for elm in oldast.dims():
             alt_counts[elm.name()] = elm.alternative_count()
-        for elem in newast.choices():
+        for elem in newast.dims():
             if not (elem.name() in alt_counts):
                 alt_counts[elem.name()] = elem.alternative_count()
             elif alt_counts[elem.name()] < elem.alternative_count():

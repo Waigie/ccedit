@@ -3,11 +3,11 @@ __author__ = 'Waigie'
 from lepl import List
 
 
-def configs(choices):
-    if choices:
-        current = choices.pop()
+def configs(dims):
+    if dims:
+        current = dims.pop()
         rtn = []
-        for config in configs(choices):
+        for config in configs(dims):
             for i in range(current[1]):
                 tmp = config.copy()
                 tmp[current[0]] = [i]
@@ -18,24 +18,24 @@ def configs(choices):
 
 
 class CCList(List):
-    def choices(self):
+    def dims(self):
         raise NotImplementedError
 
     def pretty_print(self, meta_marker):
         raise NotImplementedError
 
-    def apply_config(self, choices):
+    def apply_config(self, config):
         raise NotImplementedError
 
-    def apply_and_print(self, choices, meta_marker):
-        return self.apply_config(choices).pretty_print(meta_marker)
+    def apply_and_print(self, config, meta_marker):
+        return self.apply_config(config).pretty_print(meta_marker)
 
     def equiv(self, other):
-        choices_a = list(set(map(lambda x: (x.name(), x.alternative_count()), self.choices())))
-        choices_b = list(set(map(lambda x: (x.name(), x.alternative_count()), other.choices())))
-        choices = list(set(choices_a + choices_b))
+        dims_a = list(set(map(lambda x: (x.name(), x.alternative_count()), self.dims())))
+        dims_b = list(set(map(lambda x: (x.name(), x.alternative_count()), other.dims())))
+        dims = list(set(dims_a + dims_b))
         # if choices_a == choices_b:
-        for config in configs(choices):
+        for config in configs(dims):
             if self.apply_config(config) != other.apply_config(config):
                 return False
         return True
@@ -53,8 +53,8 @@ class DimensionName(CCList):
     def __str__(self):
         return self[0]
 
-    def apply_and_print(self, choices, meta_marker):
-        return self.apply_config(choices).pretty_print(meta_marker)
+    def apply_and_print(self, config, meta_marker):
+        return self.apply_config(config).pretty_print(meta_marker)
 
 
 class Choice(CCList):
@@ -67,28 +67,28 @@ class Choice(CCList):
     def alternative_count(self):
         return len(self[1])
 
-    def choices(self):
+    def dims(self):
         rtn = [self]
-        rtn += self.alternatives().choices()
+        rtn += self.alternatives().dims()
         return rtn
 
-    def apply_config(self, choices):
-        if self.name() in choices:
-            choices[self.name()] = list(set(choices[self.name()]))
+    def apply_config(self, config):
+        if self.name() in config:
+            config[self.name()] = list(set(config[self.name()]))
 
-        if self.name() in choices and len(choices[self.name()]) == 1:
-            if choices[self.name()][0] > self.alternative_count():
+        if self.name() in config and len(config[self.name()]) == 1:
+            if config[self.name()][0] > self.alternative_count():
                 raise ValueError
-            return self.alternatives()[choices[self.name()][0]].apply_config(choices)
-        if self.name() in choices and len(choices[self.name()]) > 1:
+            return self.alternatives()[config[self.name()][0]].apply_config(config)
+        if self.name() in config and len(config[self.name()]) > 1:
             alternatives = Alternatives()
-            for i in choices[self.name()]:
-                alternatives.append(self.alternatives()[i].apply_config(choices))
+            for i in config[self.name()]:
+                alternatives.append(self.alternatives()[i].apply_config(config))
             return Choice([self[0], alternatives])
         else:
             alternatives = Alternatives()
             for i in range(self.alternative_count()):
-                alternatives.append(self.alternatives()[i].apply_config(choices))
+                alternatives.append(self.alternatives()[i].apply_config(config))
             return Choice([self[0], alternatives])
 
     def pretty_print(self, meta_marker):
@@ -99,8 +99,8 @@ class Choice(CCList):
         )
         return rtn
 
-    def apply_and_print(self, choices, meta_marker):
-        return self.apply_config(choices).pretty_print(meta_marker)
+    def apply_and_print(self, config, meta_marker):
+        return self.apply_config(config).pretty_print(meta_marker)
 
     def __hash__(self):
         return hash(self.name())
@@ -110,9 +110,9 @@ class Choice(CCList):
 
 
 class Alternatives(CCList):
-    def choices(self):
+    def dims(self):
         rtn = []
-        for element in map(lambda alternative: alternative.choices(), self):
+        for element in map(lambda alternative: alternative.dims(), self):
             rtn += element
         return rtn
 
@@ -129,11 +129,11 @@ class Alternatives(CCList):
             rtn += ('< %s'+meta_marker+'> ') % children
         return rtn
 
-    def apply_config(self, choices):
+    def apply_config(self, config):
         return self
 
-    def apply_and_print(self, choices, meta_marker):
-        return self.apply_config(choices).pretty_print(meta_marker)
+    def apply_and_print(self, config, meta_marker):
+        return self.apply_config(config).pretty_print(meta_marker)
 
 
 # class Alternative(CCList):
@@ -145,11 +145,11 @@ class Alternatives(CCList):
 
 
 class Code(CCList):
-    def choices(self):
+    def dims(self):
         rtn = []
         for element in self:
             if isinstance(element, CCList):
-                rtn += element.choices()
+                rtn += element.dims()
         return list(set(rtn))
 
     def pretty_print(self, meta_marker):
@@ -161,11 +161,11 @@ class Code(CCList):
                 rtn += element+' '
         return rtn
 
-    def apply_config(self, choices):
+    def apply_config(self, config):
         configured_children = []
         for child in self:
             if isinstance(child, CCList):
-                configured_children.append(child.apply_config(choices))
+                configured_children.append(child.apply_config(config))
             else:
                 configured_children.append(child)
 
@@ -179,5 +179,5 @@ class Code(CCList):
 
         return Code(configured_children)
 
-    def apply_and_print(self, choices, meta_marker):
-        return self.apply_config(choices).pretty_print(meta_marker)
+    def apply_and_print(self, config, meta_marker):
+        return self.apply_config(config).pretty_print(meta_marker)
