@@ -5,7 +5,7 @@ import CCLang.Parser
 import CCLang.Lens
 
 
-class TestCCLangEuqiv(unittest.TestCase):
+class TestCCLangEquiv(unittest.TestCase):
     def setUp(self):
         self.parser = CCLang.Parser.LEPLParser("#")
 

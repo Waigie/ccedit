@@ -51,7 +51,7 @@ class MainController(QObject):
         parser = CCLang.Parser.LEPLParser('#')
         parser_result = parser.parse(self.file.code)
         if parser_result:
-            dimensions = parser_result.choices()
+            dimensions = parser_result.dims()
             for dimension in dimensions:
                 topLevelItem = CCEdit.Widgets.TopLevelTreeItem((dimension.name(), )[:1])
                 for i in range(dimension.alternative_count()):
@@ -92,7 +92,7 @@ class MainController(QObject):
             return
         self.log.info("Parsed source input")
         self.log.info(result)
-        simplifyWidget = CCEdit.Widgets.SimplifyWindow(self.view, result.choices())
+        simplifyWidget = CCEdit.Widgets.SimplifyWindow(self.view, result.dims())
         simplifyWidget.show()
 
     @Slot()
