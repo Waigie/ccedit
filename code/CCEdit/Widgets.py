@@ -21,9 +21,11 @@ class MainWindow(QMainWindow):
         file_menu = QMenu("File")
         self.new_action = file_menu.addAction('New')
         self.new_action.setShortcut(QKeySequence.New)
-        self.open_action = file_menu.addAction('Open')
-        self.open_action.triggered.connect(self.open)
+        self.open_action = file_menu.addAction('Open File')
         self.open_action.setShortcut(QKeySequence.Open)
+        self.open_folder_action = file_menu.addAction('Open Folder')
+        self.open_folder_action.setShortcut("Alt+F")
+        self.open_folder_action.setEnabled(False)
         self.save_action = file_menu.addAction('Save')
         self.save_action.setShortcut(QKeySequence.Save)
         self.save_as_action = file_menu.addAction('Save As')
@@ -40,29 +42,36 @@ class MainWindow(QMainWindow):
         self.menuBar().addMenu(file_menu)
         self.menuBar().addMenu(action_menu)
 
-        self.text_edit = QTextEdit(self)
-        self.text_edit.setStyleSheet("font: 10pt \"Courier New\";")
-        self.text_edit.setWordWrapMode(QTextOption.NoWrap)
-        self.highlighter = CCHighlighter(self.text_edit, '#')
+        # self.text_edit = QTextEdit(self)
+        # self.text_edit.setStyleSheet("font: 10pt \"Courier New\";")
+        # self.text_edit.setWordWrapMode(QTextOption.NoWrap)
+        # self.highlighter = CCHighlighter(self.text_edit, '#')
 
-        layout.addWidget(self.text_edit)
+        self.tabs = QTabWidget()
+        self.tabs.setTabsClosable(True)
+
+        layout.addWidget(self.tabs)
 
         self.central_widget.setLayout(layout)
 
-    @Slot()
-    def open(self):
-        print("Open in view")
+    def get_current_text_widget(self):
+        return self.tabs.currentWidget()
 
-    def set_text(self, text):
-        self.text_edit.setText(text)
+    def add_text_tab(self, name):
+        tab_index = self.tabs.addTab(QTextEdit(), name)
+        self.tabs.setCurrentIndex(tab_index)
+        return tab_index
 
-    def set_title(self, filename, changed):
-        if not filename:
-            filename = "[Untitled]"
-        else:
-            filename = ntpath.basename(filename)
-        title = "CCEdit - "+filename
-        if changed:
-            title += " *"
+    def remove_tab(self, tab_index):
+        self.tabs.removeTab(tab_index)
 
-        self.setWindowTitle(title)
+    def set_display_text(self, text):
+        text_edit = self.tabs.currentWidget()
+        text_edit.setText(text)
+
+    def get_display_text(self):
+        return self.tabs.currentWidget().toPlainText()
+
+    def set_display_title(self, title):
+        tab_index = self.tabs.currentIndex()
+        self.tabs.setTabText(tab_index, title)
