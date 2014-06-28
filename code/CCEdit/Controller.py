@@ -26,7 +26,7 @@ class MainController(QObject):
     @Slot()
     def new_handler(self):
         self.state = ApplicationState()
-        self.view.set_text(self.state.code)
+        self.view.set_text(self.state.source)
         self.view.set_title(self.state.filename, self.state.changed)
 
     @Slot()
@@ -36,9 +36,9 @@ class MainController(QObject):
             self.state = ApplicationState()
             self.state.filename = filename[0]
             file = open(filename[0])
-            self.state.code = file.read()
+            self.state.source = file.read()
             file.close()
-            self.view.set_text(self.state.code)
+            self.view.set_text(self.state.source)
             self.view.set_title(self.state.filename, self.state.changed)
 
     @Slot()

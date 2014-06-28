@@ -53,7 +53,8 @@ class Logger(logging.Handler):
         print(self.format(record))
 
 
+class Config():
+    @staticmethod()
+    def search_config_file(path):
 
-
-
-
+        pass
