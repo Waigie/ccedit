@@ -43,6 +43,7 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea(Qt.LeftDockWidgetArea), self.dimension_dock)
 
         layout.addWidget(self.tabs)
+        self.central_widget.setLayout(layout)
 
     def get_current_text_widget(self):
         return self.tabs.currentWidget()
