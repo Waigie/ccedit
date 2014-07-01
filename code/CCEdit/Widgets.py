@@ -34,31 +34,26 @@ class MainWindow(QMainWindow):
         self.close_action = file_menu.addAction('Close')
         self.close_action.setShortcut(QKeySequence.Close)
 
-        action_menu = QMenu("Action")
-        self.simplify_action = action_menu.addAction('Simplify')
-        self.merge_action = action_menu.addAction('Merge')
-        self.merge_action.setEnabled(False)
-
         self.menuBar().addMenu(file_menu)
-        self.menuBar().addMenu(action_menu)
-
-        # self.text_edit = QTextEdit(self)
-        # self.text_edit.setStyleSheet("font: 10pt \"Courier New\";")
-        # self.text_edit.setWordWrapMode(QTextOption.NoWrap)
-        # self.highlighter = CCHighlighter(self.text_edit, '#')
 
         self.tabs = QTabWidget()
         self.tabs.setTabsClosable(True)
 
-        layout.addWidget(self.tabs)
+        self.dimension_dock = DimensionDock(self)
+        self.addDockWidget(Qt.DockWidgetArea(Qt.LeftDockWidgetArea), self.dimension_dock)
 
-        self.central_widget.setLayout(layout)
+        layout.addWidget(self.tabs)
 
     def get_current_text_widget(self):
         return self.tabs.currentWidget()
 
     def add_text_tab(self, name):
-        tab_index = self.tabs.addTab(QTextEdit(), name)
+        text_edit = QTextEdit()
+        text_edit.setStyleSheet("font: 10pt \"Courier New\";")
+        text_edit.setWordWrapMode(QTextOption.NoWrap)
+        CCHighlighter(text_edit, '#')
+
+        tab_index = self.tabs.addTab(text_edit, name)
         self.tabs.setCurrentIndex(tab_index)
         return tab_index
 
@@ -75,3 +70,53 @@ class MainWindow(QMainWindow):
     def set_display_title(self, title):
         tab_index = self.tabs.currentIndex()
         self.tabs.setTabText(tab_index, title)
+
+
+class DimensionDock(QDockWidget):
+    def __init__(self, parent_window):
+        QDockWidget.__init__(self, "Dimensions", parent_window)
+        self.parent_window = parent_window
+
+        self.central_widget = QWidget(self)
+        self.setWidget(self.central_widget)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        # self.table_widget = QTableWidget()
+        # self.table_widget.setSelectionMode(QAbstractItemView.NoSelection)
+        # self.table_widget.setColumnCount(4)
+        # self.table_widget.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        # self.table_widget.horizontalHeader().setVisible(False)
+        # self.table_widget.verticalHeader().setVisible(False)
+        # self.table_widget.verticalHeader().setResizeMode(QHeaderView.Fixed)
+        # self.table_widget.verticalHeader().setDefaultSectionSize(20)
+        # layout.addWidget(self.table_widget)
+
+        self.dimension_tree = QTreeWidget()
+        self.dimension_tree.setExpandsOnDoubleClick(False)
+        self.dimension_tree.setColumnCount(3)
+        self.dimension_tree.setColumnWidth(1, 24)
+        self.dimension_tree.setColumnWidth(2, 24)
+        dimension = QTreeWidgetItem(self.dimension_tree, 0)
+        dimension.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable)
+        for i in range(3):
+            alternative = QTreeWidgetItem(str(i))
+            alternative.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable)
+            alternative.setCheckState(0, Qt.Checked)
+            dimension.addChild(alternative)
+        #self.dimension_tree.addTopLevelItem(dimension)
+        dimension.setText(0,"A")
+        editbutton = QToolButton(self.dimension_tree)
+        editbutton.setIcon(QIcon.fromTheme('edit'))
+        editbutton.setFixedWidth(24)
+        delbutton = QToolButton(self.dimension_tree)
+        delbutton.setIcon(QIcon.fromTheme('delete'))
+        delbutton.setFixedWidth(24)
+        self.dimension_tree.setItemWidget(dimension, 1, editbutton)
+        self.dimension_tree.setItemWidget(dimension, 2, delbutton)
+        dimension.setExpanded(True)
+
+        layout.addWidget(self.dimension_tree)
+
+        self.central_widget.setLayout(layout)
