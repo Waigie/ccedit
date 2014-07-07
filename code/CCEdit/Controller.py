@@ -23,6 +23,7 @@ class MainController(QObject):
         self.view.tabs.tabCloseRequested.connect(self.close_tab_handler)
         self.view.tabs.currentChanged.connect(self.tab_changed_handler)
         # self.view.text_edit.textChanged.connect(self.text_change_handler)
+        self.view.dimension_dock.addButton.clicked.connect(self.add_dimension_handler)
 
     @Slot()
     def new_handler(self):
@@ -74,9 +75,24 @@ class MainController(QObject):
     @Slot()
     def tab_changed_handler(self, tab_index):
         self.state.active_tab = tab_index
+        if tab_index > -1:
+            self.view.show_dimensions()
+        else:
+            self.view.hide_dimensions()
 
     @Slot()
     def text_change_handler(self):
         self.state.set_active_source(self.view.get_display_text())
         self.view.set_display_title(self.state.active_title())
 
+    @Slot()
+    def add_dimension_handler(self):
+        dimension_name = "NewDimension"
+        count = 1
+        while dimension_name in self.state.dimensions:
+            count += 1
+            dimension_name = "NewDimension"+str(count)
+
+        self.state.dimensions[dimension_name] = ["Alternative1", "Alternative2"]
+
+        self.view.render_dimensiondock(self.state.dimensions, self.state.config)

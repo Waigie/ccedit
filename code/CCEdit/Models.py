@@ -1,6 +1,7 @@
 __author__ = 'Christoph Weygand'
 
 import ntpath
+import collections
 
 
 class ApplicationState():
@@ -8,7 +9,7 @@ class ApplicationState():
         self.tabs = []
         self.active_tab = -1
         self.config = {}
-        self.dimensions = {}
+        self.dimensions = collections.OrderedDict()
 
     def update_view(self, view):
         if self.active_tab > -1:
@@ -41,8 +42,6 @@ class TabState():
     def __init__(self):
         self.source = ""
         self.view = ""
-        self.config = {}
-        self.dimensions = {}
         self.filename = ""
         self.changed = False
 

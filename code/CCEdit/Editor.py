@@ -1,6 +1,7 @@
 __author__ = 'Christoph Weygand'
 
 import sys
+import os.path
 from PySide.QtGui import QApplication
 from CCEdit.Widgets import MainWindow
 from CCEdit.Controller import MainController
