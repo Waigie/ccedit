@@ -1,8 +1,13 @@
+import CCLang
+
 __author__ = 'Christoph Weygand'
 
-from PySide.QtCore import QObject, Slot
+from PySide.QtCore import QObject, Slot, Qt
 from PySide.QtGui import QFileDialog, QApplication
 from CCEdit.Models import ApplicationState, TabState
+import CCLang.Parser
+import CCLang.Lens
+import collections
 
 
 class MainController(QObject):
@@ -29,6 +34,9 @@ class MainController(QObject):
         self.view.delete_dimension.connect(self.delete_dimension_handler)
         self.view.add_alternative.connect(self.add_alternative_handler)
 
+        self.view.dimension_dock.dimension_tree.itemChanged.connect(self.tree_item_changed)
+
+
     @Slot()
     def new_handler(self):
         self.state.tabs.append(TabState())
@@ -48,8 +56,8 @@ class MainController(QObject):
             self.state.tabs.append(tab_state)
 
             self.view.add_text_tab(tab_state.title())
-            self.view.get_current_text_widget().setText(tab_state.source)
             self.view.get_current_text_widget().textChanged.connect(self.text_change_handler)
+            self.view.get_current_text_widget().setText(tab_state.source)
 
     @Slot()
     def save_handler(self):
@@ -86,7 +94,7 @@ class MainController(QObject):
 
     @Slot()
     def text_change_handler(self):
-        self.state.set_active_source(self.view.get_display_text())
+        self.state.set_active_view(self.view.get_display_text())
         self.view.set_display_title(self.state.active_title())
 
     @Slot()
@@ -115,3 +123,40 @@ class MainController(QObject):
     def add_alternative_handler(self, dimension_name):
         self.state.dimensions[dimension_name].append('Alternative'+str(len(self.state.dimensions[dimension_name])))
         self.view.render_dimensiondock(self.state.dimensions, self.state.config)
+
+    @Slot()
+    def tree_item_changed(self):
+        new_config = {}
+        new_dimensions = collections.OrderedDict()
+        for i in range(self.view.dimension_dock.dimension_tree.topLevelItemCount()):
+            dimension = self.view.dimension_dock.dimension_tree.topLevelItem(i)
+            all_checked = True
+            checked = []
+            alternatives = []
+            for j in range(dimension.childCount()-1):
+                alternatives.append(dimension.child(j).text(0))
+                if dimension.child(j).checkState(0) == Qt.CheckState.Checked:
+                    checked.append(j)
+                else:
+                    all_checked = False
+
+            new_dimensions[dimension.text(0)] = alternatives
+            if not all_checked:
+                new_config[dimension.text(0)] = checked
+
+        self.state.dimensions = new_dimensions
+        old_config = self.state.config
+        self.state.config = new_config
+
+        self.view.render_dimensiondock(self.state.dimensions, self.state.config)
+
+        self.update_view(old_config)
+
+    def update_view(self, old_config):
+        parser = CCLang.Parser.LEPLParser("#")
+        print(self.state.get_active_source(),self.state.get_active_view())
+        new_src_ast = CCLang.Lens.update(old_config, parser.parse(self.state.get_active_source()), parser.parse(self.state.get_active_view()))
+        self.state.set_active_source(new_src_ast.apply_and_print({}, '#'))
+        self.state.set_active_view(new_src_ast.apply_and_print(self.state.config, '#'))
+        self.view.set_display_text(self.state.get_active_view())
+

@@ -9,6 +9,7 @@ class MainWindow(QMainWindow):
     delete_alternative = Signal(str, int)
     delete_dimension = Signal(str)
     add_alternative = Signal(str)
+    config_changed = Signal()
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -122,6 +123,7 @@ class DimensionDock(QDockWidget):
         self.central_widget.setLayout(layout)
 
     def redraw_tree(self, dimensions, config):
+        self.dimension_tree.blockSignals(True)
         self.dimension_tree.clear()
         self.dimension_tree.setColumnCount(3)
         self.dimension_tree.setColumnWidth(1, 24)
@@ -164,6 +166,9 @@ class DimensionDock(QDockWidget):
 
             self.dimension_tree.setItemWidget(dimension, 2, del_button)
             dimension.setExpanded(True)
+
+        self.dimension_tree.blockSignals(False)
+        #self.dimension_tree.itemChanged.emit(None, 0)
 
     @Slot()
     def delete_alternative_handler(self):

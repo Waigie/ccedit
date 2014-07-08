@@ -27,6 +27,15 @@ class ApplicationState():
                 self.tabs[self.active_tab].changed = True
             self.tabs[self.active_tab].source = source
 
+    def get_active_view(self):
+        return self.tabs[self.active_tab].view
+
+    def set_active_view(self, view):
+        if self.active_tab > -1:
+            if view != self.tabs[self.active_tab].view:
+                self.tabs[self.active_tab].changed = True
+            self.tabs[self.active_tab].view = view
+
     def get_active_filename(self):
         return self.tabs[self.active_tab].filename
 
