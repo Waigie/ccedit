@@ -4,7 +4,12 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 from CCEdit.Services import CCHighlighter
 
+
 class MainWindow(QMainWindow):
+    delete_alternative = Signal(str, int)
+    delete_dimension = Signal(str)
+    add_alternative = Signal(str)
+
     def __init__(self):
         QMainWindow.__init__(self)
         self.setMinimumSize(QSize(1024, 768))
@@ -130,40 +135,82 @@ class DimensionDock(QDockWidget):
             dimension.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable)
             dimension.setText(0, dimension_name)
 
+            alternative_num = 0
             for alternative_name in dimensions[dimension_name]:
                 alternative = QTreeWidgetItem(dimension, 0)
                 alternative.setText(0, alternative_name)
                 alternative.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable)
-                alternative.setCheckState(0, Qt.Checked)
+                if dimension_name in config and alternative_num in config[dimension_name]:
+                    alternative.setCheckState(0, Qt.Checked)
+                elif dimension_name in config:
+                    alternative.setCheckState(0, Qt.Unchecked)
+                else:
+                    alternative.setCheckState(0, Qt.Checked)
 
-                button = QToolButton(self.dimension_tree)
-                button.setIcon(QIcon("../../resources/icons/remove.png"))
-                button.setStyleSheet("background: transparent")
-                button.setToolTip("Remove alternative")
-                button.setFixedWidth(16)
-                button.setFixedHeight(16)
+                button = AlternativeDeleteButton(self.dimension_tree, dimension_name, alternative_num)
+                button.clicked.connect(self.delete_alternative_handler)
 
                 self.dimension_tree.setItemWidget(alternative, 2, button)
+                alternative_num += 1
 
-            add_button = QToolButton(self.dimension_tree)
-            add_button.setIcon(QIcon("../../resources/icons/add.png"))
-            add_button.setStyleSheet("background: transparent")
-            add_button.setToolTip("Add alternative")
-            add_button.setFixedWidth(16)
-            add_button.setFixedHeight(16)
+            add_button = AlternativeAddButton(self.dimension_tree, dimension_name)
+            add_button.clicked.connect(self.add_alternative_handler)
 
             add_alternative = QTreeWidgetItem(dimension, 0)
             self.dimension_tree.setItemWidget(add_alternative, 0, add_button)
 
-            del_button = QToolButton(self.dimension_tree)
-            del_button.setIcon(QIcon("../../resources/icons/remove.png"))
-            del_button.setStyleSheet("background: transparent")
-            del_button.setToolTip("Remove dimension")
-            del_button.setFixedWidth(16)
-            del_button.setFixedHeight(16)
+            del_button = DimensionDeleteButton(self.dimension_tree, dimension_name)
+            del_button.clicked.connect(self.delete_dimension_handler)
 
             self.dimension_tree.setItemWidget(dimension, 2, del_button)
             dimension.setExpanded(True)
 
+    @Slot()
+    def delete_alternative_handler(self):
+        sender = self.sender()
+        self.parent_window.delete_alternative.emit(sender.dimension_name, sender.alternative)
+
+    @Slot()
+    def add_alternative_handler(self):
+        sender = self.sender()
+        self.parent_window.add_alternative.emit(sender.dimension_name)
 
 
+    @Slot()
+    def delete_dimension_handler(self):
+        sender = self.sender()
+        self.parent_window.delete_dimension.emit(sender.dimension_name)
+
+
+class AlternativeDeleteButton(QToolButton):
+    def __init__(self, parent, dimension, alternative):
+        QToolButton.__init__(self, parent)
+        self.dimension_name = dimension
+        self.alternative = alternative
+        self.setIcon(QIcon("../../resources/icons/remove.png"))
+        self.setStyleSheet("background: transparent")
+        self.setToolTip("Remove alternative")
+        self.setFixedWidth(16)
+        self.setFixedHeight(16)
+
+
+class AlternativeAddButton(QToolButton):
+    def __init__(self, parent, dimension):
+        QToolButton.__init__(self, parent)
+        self.dimension_name = dimension
+        self.setIcon(QIcon("../../resources/icons/add.png"))
+        self.setStyleSheet("background: transparent")
+        self.setToolTip("Remove alternative")
+        self.setFixedWidth(16)
+        self.setFixedHeight(16)
+
+
+class DimensionDeleteButton(QToolButton):
+    def __init__(self, parent, dimension):
+        QToolButton.__init__(self, parent)
+        self.dimension_name = dimension
+        self.setIcon(QIcon("../../resources/icons/remove.png"))
+        self.setStyleSheet("background: transparent")
+        self.setToolTip("Remove alternative")
+        self.setFixedWidth(16)
+        self.setFixedHeight(16)

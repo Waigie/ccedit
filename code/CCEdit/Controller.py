@@ -22,8 +22,12 @@ class MainController(QObject):
         self.view.close_action.triggered.connect(self.close_handler)
         self.view.tabs.tabCloseRequested.connect(self.close_tab_handler)
         self.view.tabs.currentChanged.connect(self.tab_changed_handler)
+
         # self.view.text_edit.textChanged.connect(self.text_change_handler)
         self.view.dimension_dock.addButton.clicked.connect(self.add_dimension_handler)
+        self.view.delete_alternative.connect(self.delete_alternative_handler)
+        self.view.delete_dimension.connect(self.delete_dimension_handler)
+        self.view.add_alternative.connect(self.add_alternative_handler)
 
     @Slot()
     def new_handler(self):
@@ -95,4 +99,19 @@ class MainController(QObject):
 
         self.state.dimensions[dimension_name] = ["Alternative1", "Alternative2"]
 
+        self.view.render_dimensiondock(self.state.dimensions, self.state.config)
+
+    @Slot()
+    def delete_alternative_handler(self, dimension_name, alternative_num):
+        self.state.dimensions[dimension_name].pop(alternative_num)
+        self.view.render_dimensiondock(self.state.dimensions, self.state.config)
+
+    @Slot()
+    def delete_dimension_handler(self, dimension_name):
+        self.state.dimensions.pop(dimension_name)
+        self.view.render_dimensiondock(self.state.dimensions, self.state.config)
+
+    @Slot()
+    def add_alternative_handler(self, dimension_name):
+        self.state.dimensions[dimension_name].append('Alternative'+str(len(self.state.dimensions[dimension_name])))
         self.view.render_dimensiondock(self.state.dimensions, self.state.config)
