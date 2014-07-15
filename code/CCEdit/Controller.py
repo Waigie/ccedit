@@ -29,7 +29,7 @@ class MainController(QObject):
         self.view.tabs.currentChanged.connect(self.tab_changed_handler)
 
         # self.view.text_edit.textChanged.connect(self.text_change_handler)
-        self.view.dimension_dock.addButton.clicked.connect(self.add_dimension_handler)
+        self.view.add_dimension.connect(self.add_dimension_handler)
         self.view.delete_alternative.connect(self.delete_alternative_handler)
         self.view.delete_dimension.connect(self.delete_dimension_handler)
         self.view.add_alternative.connect(self.add_alternative_handler)

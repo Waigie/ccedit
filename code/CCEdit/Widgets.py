@@ -9,6 +9,7 @@ class MainWindow(QMainWindow):
     delete_alternative = Signal(str, int)
     delete_dimension = Signal(str)
     add_alternative = Signal(str)
+    add_dimension = Signal()
     config_changed = Signal()
 
     def __init__(self):
@@ -110,19 +111,21 @@ class DimensionDock(QDockWidget):
         self.dimension_tree.header().setResizeMode(0, QHeaderView.Stretch)
         self.dimension_tree.header().setStretchLastSection(False)
         self.dimension_tree.itemClicked.connect(self.item_clicked)
+        AddDimensionTreeItem(self.dimension_tree, 0, self.add_icon)
+
 
         layout.addWidget(self.dimension_tree)
 
-        buttonBar = QVBoxLayout()
-
-        self.addButton = QToolButton(self)
-        self.addButton.setIcon(QIcon("../../resources/icons/add.png"))
-        self.addButton.setToolTip("Add Dimension")
-        self.addButton.setStyleSheet("background: transparent")
-        buttonBar.addWidget(self.addButton)
-
-        # layout.addChildLayout(buttonBar)
-        layout.addLayout(buttonBar)
+        # buttonBar = QVBoxLayout()
+        #
+        # self.addButton = QToolButton(self)
+        # self.addButton.setIcon(QIcon("../../resources/icons/add.png"))
+        # self.addButton.setToolTip("Add Dimension")
+        # self.addButton.setStyleSheet("background: transparent")
+        # buttonBar.addWidget(self.addButton)
+        #
+        # # layout.addChildLayout(buttonBar)
+        # layout.addLayout(buttonBar)
 
         self.central_widget.setLayout(layout)
 
@@ -153,6 +156,7 @@ class DimensionDock(QDockWidget):
 
             dimension.setExpanded(True)
 
+        AddDimensionTreeItem(self.dimension_tree, 0, self.add_icon)
         self.dimension_tree.blockSignals(False)
         #self.dimension_tree.itemChanged.emit(None, 0)
 
@@ -164,6 +168,8 @@ class DimensionDock(QDockWidget):
             self.parent_window.delete_alternative.emit(item.dimension, item.alternative_num)
         elif isinstance(item, DimensionTreeItem) and col == 2:
             self.parent_window.delete_dimension.emit(item.dimension)
+        elif isinstance(item, AddDimensionTreeItem) and col == 0:
+            self.parent_window.add_dimension.emit()
 
 
 class AlternativeTreeItem(QTreeWidgetItem):
@@ -190,3 +196,9 @@ class DimensionTreeItem(QTreeWidgetItem):
         self.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable)
         self.dimension = ''
         self.setIcon(2, icon)
+
+class AddDimensionTreeItem(QTreeWidgetItem):
+    def __init__(self, parent, col, icon):
+        QTreeWidgetItem.__init__(self, parent, col)
+        self.setIcon(0, icon)
+        self.dimension = ''
