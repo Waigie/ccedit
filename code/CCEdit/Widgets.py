@@ -88,9 +88,12 @@ class MainWindow(QMainWindow):
 
 
 class DimensionDock(QDockWidget):
+
     def __init__(self, parent_window):
         QDockWidget.__init__(self, "Dimensions", parent_window)
         self.parent_window = parent_window
+        self.delete_icon = QIcon("../../resources/icons/remove.png")
+        self.add_icon = QIcon("../../resources/icons/add.png")
 
         self.central_widget = QWidget(self)
         self.setWidget(self.central_widget)
@@ -106,6 +109,7 @@ class DimensionDock(QDockWidget):
         self.dimension_tree.header().hide()
         self.dimension_tree.header().setResizeMode(0, QHeaderView.Stretch)
         self.dimension_tree.header().setStretchLastSection(False)
+        self.dimension_tree.itemClicked.connect(self.item_clicked)
 
         layout.addWidget(self.dimension_tree)
 
@@ -125,97 +129,64 @@ class DimensionDock(QDockWidget):
     def redraw_tree(self, dimensions, config):
         self.dimension_tree.blockSignals(True)
         self.dimension_tree.clear()
-        self.dimension_tree.setColumnCount(3)
-        self.dimension_tree.setColumnWidth(1, 24)
-        self.dimension_tree.setColumnWidth(2, 24)
-        self.dimension_tree.header().hide()
-        self.dimension_tree.header().setResizeMode(0, QHeaderView.Stretch)
-        self.dimension_tree.header().setStretchLastSection(False)
 
         for dimension_name in dimensions.keys():
-            dimension = QTreeWidgetItem(self.dimension_tree, 0)
-            dimension.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable)
+            dimension = DimensionTreeItem(self.dimension_tree, 0, dimension_name, self.delete_icon)
             dimension.setText(0, dimension_name)
 
             alternative_num = 0
             for alternative_name in dimensions[dimension_name]:
-                alternative = QTreeWidgetItem(dimension, 0)
-                alternative.setText(0, alternative_name)
-                alternative.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable)
                 if dimension_name in config and alternative_num in config[dimension_name]:
-                    alternative.setCheckState(0, Qt.Checked)
+                    alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Checked, self.delete_icon)
                 elif dimension_name in config:
-                    alternative.setCheckState(0, Qt.Unchecked)
+                    alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Unchecked, self.delete_icon)
                 else:
-                    alternative.setCheckState(0, Qt.Checked)
+                    alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Checked, self.delete_icon)
 
-                button = AlternativeDeleteButton(self.dimension_tree, dimension_name, alternative_num)
-                button.clicked.connect(self.delete_alternative_handler)
+                alternative.dimension = dimension_name
+                alternative.alternative_num = alternative_num
 
-                self.dimension_tree.setItemWidget(alternative, 2, button)
                 alternative_num += 1
 
-            add_button = AlternativeAddButton(self.dimension_tree, dimension_name)
-            add_button.clicked.connect(self.add_alternative_handler)
+            add_alternative = AddAlternativeTreeItem(dimension, 0, self.add_icon)
+            add_alternative.dimension = dimension_name
 
-            add_alternative = QTreeWidgetItem(dimension, 0)
-            self.dimension_tree.setItemWidget(add_alternative, 0, add_button)
-
-            del_button = DimensionDeleteButton(self.dimension_tree, dimension_name)
-            del_button.clicked.connect(self.delete_dimension_handler)
-
-            self.dimension_tree.setItemWidget(dimension, 2, del_button)
             dimension.setExpanded(True)
 
         self.dimension_tree.blockSignals(False)
         #self.dimension_tree.itemChanged.emit(None, 0)
 
     @Slot()
-    def delete_alternative_handler(self):
-        sender = self.sender()
-        self.parent_window.delete_alternative.emit(sender.dimension_name, sender.alternative)
-
-    @Slot()
-    def add_alternative_handler(self):
-        sender = self.sender()
-        self.parent_window.add_alternative.emit(sender.dimension_name)
-
-
-    @Slot()
-    def delete_dimension_handler(self):
-        sender = self.sender()
-        self.parent_window.delete_dimension.emit(sender.dimension_name)
+    def item_clicked(self, item, col):
+        if isinstance(item, AddAlternativeTreeItem) and col == 0:
+            self.parent_window.add_alternative.emit(item.dimension)
+        elif isinstance(item, AlternativeTreeItem) and col == 2:
+            self.parent_window.delete_alternative.emit(item.dimension, item.alternative_num)
+        elif isinstance(item, DimensionTreeItem) and col == 2:
+            self.parent_window.delete_dimension.emit(item.dimension)
 
 
-class AlternativeDeleteButton(QToolButton):
-    def __init__(self, parent, dimension, alternative):
-        QToolButton.__init__(self, parent)
-        self.dimension_name = dimension
-        self.alternative = alternative
-        self.setIcon(QIcon("../../resources/icons/remove.png"))
-        self.setStyleSheet("background: transparent")
-        self.setToolTip("Remove alternative")
-        self.setFixedWidth(16)
-        self.setFixedHeight(16)
+class AlternativeTreeItem(QTreeWidgetItem):
+    def __init__(self, parent, col, name, checkstate, icon):
+        QTreeWidgetItem.__init__(self, parent, col)
+        self.setText(0, name)
+        self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable)
+        self.setCheckState(0, checkstate)
+        self.dimension = ''
+        self.setIcon(2, icon)
+        self.alternative_num = ''
+
+class AddAlternativeTreeItem(QTreeWidgetItem):
+    def __init__(self, parent, col, icon):
+        QTreeWidgetItem.__init__(self, parent, col)
+        self.setIcon(0, icon)
+        self.dimension = ''
 
 
-class AlternativeAddButton(QToolButton):
-    def __init__(self, parent, dimension):
-        QToolButton.__init__(self, parent)
-        self.dimension_name = dimension
-        self.setIcon(QIcon("../../resources/icons/add.png"))
-        self.setStyleSheet("background: transparent")
-        self.setToolTip("Remove alternative")
-        self.setFixedWidth(16)
-        self.setFixedHeight(16)
-
-
-class DimensionDeleteButton(QToolButton):
-    def __init__(self, parent, dimension):
-        QToolButton.__init__(self, parent)
-        self.dimension_name = dimension
-        self.setIcon(QIcon("../../resources/icons/remove.png"))
-        self.setStyleSheet("background: transparent")
-        self.setToolTip("Remove alternative")
-        self.setFixedWidth(16)
-        self.setFixedHeight(16)
+class DimensionTreeItem(QTreeWidgetItem):
+    def __init__(self, parent, col, name, icon):
+        QTreeWidgetItem.__init__(self, parent, col)
+        self.setText(0, name)
+        self.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable)
+        self.dimension = ''
+        self.setIcon(2, icon)

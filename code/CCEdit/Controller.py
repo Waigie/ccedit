@@ -126,6 +126,7 @@ class MainController(QObject):
 
     @Slot()
     def tree_item_changed(self):
+        print("changed")
         new_config = {}
         new_dimensions = collections.OrderedDict()
         for i in range(self.view.dimension_dock.dimension_tree.topLevelItemCount()):
