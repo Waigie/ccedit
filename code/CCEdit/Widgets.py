@@ -119,35 +119,123 @@ class DimensionDock(QDockWidget):
 
     def redraw_tree(self, dimensions, config):
         self.dimension_tree.blockSignals(True)
-        self.dimension_tree.clear()
 
-        for dimension_name in dimensions.keys():
+        for dimension in dimensions.keys():
+            dimension_item = self.dimension_tree.findItems(dimension, Qt.MatchExactly)
+            if not dimension_item:
+                dimension_item = DimensionTreeItem(None, 0, dimension, self.delete_icon)
+                dimension_item.setText(0, dimension)
+                self.dimension_tree.insertTopLevelItem(self.dimension_tree.topLevelItemCount()-1, dimension_item)
 
-            dimension = DimensionTreeItem(self.dimension_tree, 0, dimension_name, self.delete_icon)
-            dimension.setText(0, dimension_name)
+                add_alternative = AddAlternativeTreeItem(None, 0, self.add_icon)
+                add_alternative.dimension = dimension
+                dimension_item.addChild(add_alternative)
 
-            alternative_num = 0
-            for alternative_name in dimensions[dimension_name]:
-                if dimension_name in config and alternative_num in config[dimension_name]:
-                    alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Checked, self.delete_icon)
-                elif dimension_name in config:
-                    alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Unchecked, self.delete_icon)
-                else:
-                    alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Checked, self.delete_icon)
+            else:
+                dimension_item = dimension_item[0]
 
-                alternative.dimension = dimension_name
-                alternative.alternative_num = alternative_num
+            dimension_item.setExpanded(True)
 
-                alternative_num += 1
+            if dimension in config:
+                self.update_alternatives(dimension_item, dimensions[dimension], config[dimension])
+            else:
+                self.update_alternatives(dimension_item, dimensions[dimension], [])
 
-            add_alternative = AddAlternativeTreeItem(dimension, 0, self.add_icon)
-            add_alternative.dimension = dimension_name
+        for i in reversed(range(self.dimension_tree.topLevelItemCount())):
+            item = self.dimension_tree.topLevelItem(i)
+            if isinstance(item, AddDimensionTreeItem):
+                continue
 
-            dimension.setExpanded(True)
+            if not item.text(0) in dimensions:
+                self.dimension_tree.takeTopLevelItem(i)
 
-        AddDimensionTreeItem(self.dimension_tree, 0, self.add_icon)
         self.dimension_tree.blockSignals(False)
-        #self.dimension_tree.itemChanged.emit(None, 0)
+
+    def update_alternatives(self, item, alternatives, config):
+        print(config)
+        counter = 0
+        for i in range(min(item.childCount(), len(alternatives))):
+            if isinstance(item.child(i), AddAlternativeTreeItem):
+                continue
+            item.child(i).setText(0, alternatives[i])
+            item.child(i).dimension = item.text(0)
+            item.child(i).alternative_num = i
+            if i in config or not config:
+                item.child(i).setCheckState(0, Qt.Checked)
+            else:
+                item.child(i).setCheckState(0, Qt.Unchecked)
+
+            counter += 1
+
+        if item.childCount() > len(alternatives):
+            for i in reversed(range(len(alternatives), item.childCount())):
+                if isinstance(item.child(i), AddAlternativeTreeItem):
+                    continue
+                item.takeChild(i)
+        else:
+            for i in range(counter, len(alternatives)):
+                child = AlternativeTreeItem(None, 0, alternatives[i], Qt.Checked, self.delete_icon)
+                child.dimension = item.text(0)
+                child.alternative_num = i
+                if i in config or not config:
+                    child.setCheckState(0, Qt.Checked)
+                else:
+                    child.setCheckState(0, Qt.Unchecked)
+
+                item.insertChild(item.childCount()-1, child)
+
+
+        # for alternative in alternatives:
+        #     if item.child(counter) and isinstance(item.child(counter), AddAlternativeTreeItem):
+        #         item.child(counter).setText(0, alternative)
+        #         item.child(counter).dimension = item.text(0)
+        #         item.child(counter).alternative_num = counter
+        #     else:
+        #         child = AlternativeTreeItem(None, 0, alternative, Qt.Checked, self.delete_icon)
+        #         child.dimension = item.text(0)
+        #         child.alternative_num = counter
+        #         item.insertChild(item.childCount()-1, child)
+        #
+        #     counter += 1
+        #
+        # if counter < item.childCount():
+        #     for i in range(counter, item.childCount()):
+        #         child = item.child(i)
+        #         if isinstance(child, AddAlternativeTreeItem):
+        #             continue
+        #
+        #         item.takeChild(i)
+
+        # self.dimension_tree.clear()
+        #
+        # for dimension_name in dimensions.keys():
+        #
+        #     dimension = DimensionTreeItem(self.dimension_tree, 0, dimension_name, self.delete_icon)
+        #     dimension.setText(0, dimension_name)
+        #
+        #     alternative_num = 0
+        #     for alternative_name in dimensions[dimension_name]:
+        #         if dimension_name in config and alternative_num in config[dimension_name]:
+        #             alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Checked, self.delete_icon)
+        #         elif dimension_name in config:
+        #             alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Unchecked, self.delete_icon)
+        #         else:
+        #             alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Checked, self.delete_icon)
+        #
+        #         alternative.dimension = dimension_name
+        #         alternative.alternative_num = alternative_num
+        #
+        #         alternative_num += 1
+        #
+        #     add_alternative = AddAlternativeTreeItem(dimension, 0, self.add_icon)
+        #     add_alternative.dimension = dimension_name
+        #
+        #     dimension.setExpanded(True)
+        #
+        # AddDimensionTreeItem(self.dimension_tree, 0, self.add_icon)
+        # #self.dimension_tree.itemChanged.emit(None, 0)
+
+        # return None
 
     @Slot()
     def item_clicked(self, item, col):
@@ -171,6 +259,7 @@ class AlternativeTreeItem(QTreeWidgetItem):
         self.setIcon(2, icon)
         self.alternative_num = ''
 
+
 class AddAlternativeTreeItem(QTreeWidgetItem):
     def __init__(self, parent, col, icon):
         QTreeWidgetItem.__init__(self, parent, col)
@@ -183,8 +272,9 @@ class DimensionTreeItem(QTreeWidgetItem):
         QTreeWidgetItem.__init__(self, parent, col)
         self.setText(0, name)
         self.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable)
-        self.dimension = ''
+        self.dimension = name
         self.setIcon(2, icon)
+
 
 class AddDimensionTreeItem(QTreeWidgetItem):
     def __init__(self, parent, col, icon):

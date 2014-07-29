@@ -117,11 +117,13 @@ class MainController(QObject):
     @Slot()
     def delete_dimension_handler(self, dimension_name):
         self.state.dimensions.pop(dimension_name)
+        if dimension_name in self.state.config:
+            self.state.config.pop(dimension_name)
         self.view.render_dimensiondock(self.state.dimensions, self.state.config)
 
     @Slot()
     def add_alternative_handler(self, dimension_name):
-        self.state.dimensions[dimension_name].append('Alternative'+str(len(self.state.dimensions[dimension_name])))
+        self.state.dimensions[dimension_name].append('Alternative'+str(len(self.state.dimensions[dimension_name])+1))
         self.view.render_dimensiondock(self.state.dimensions, self.state.config)
 
     @Slot()
