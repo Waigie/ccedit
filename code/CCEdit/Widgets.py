@@ -113,19 +113,7 @@ class DimensionDock(QDockWidget):
         self.dimension_tree.itemClicked.connect(self.item_clicked)
         AddDimensionTreeItem(self.dimension_tree, 0, self.add_icon)
 
-
         layout.addWidget(self.dimension_tree)
-
-        # buttonBar = QVBoxLayout()
-        #
-        # self.addButton = QToolButton(self)
-        # self.addButton.setIcon(QIcon("../../resources/icons/add.png"))
-        # self.addButton.setToolTip("Add Dimension")
-        # self.addButton.setStyleSheet("background: transparent")
-        # buttonBar.addWidget(self.addButton)
-        #
-        # # layout.addChildLayout(buttonBar)
-        # layout.addLayout(buttonBar)
 
         self.central_widget.setLayout(layout)
 
@@ -134,6 +122,7 @@ class DimensionDock(QDockWidget):
         self.dimension_tree.clear()
 
         for dimension_name in dimensions.keys():
+
             dimension = DimensionTreeItem(self.dimension_tree, 0, dimension_name, self.delete_icon)
             dimension.setText(0, dimension_name)
 

@@ -129,7 +129,7 @@ class MainController(QObject):
         print("changed")
         new_config = {}
         new_dimensions = collections.OrderedDict()
-        for i in range(self.view.dimension_dock.dimension_tree.topLevelItemCount()):
+        for i in range(self.view.dimension_dock.dimension_tree.topLevelItemCount()-1):
             dimension = self.view.dimension_dock.dimension_tree.topLevelItem(i)
             all_checked = True
             checked = []
@@ -155,7 +155,7 @@ class MainController(QObject):
 
     def update_view(self, old_config):
         parser = CCLang.Parser.LEPLParser("#")
-        print(self.state.get_active_source(),self.state.get_active_view())
+        print(self.state.get_active_source(), self.state.get_active_view())
         new_src_ast = CCLang.Lens.update(old_config, parser.parse(self.state.get_active_source()), parser.parse(self.state.get_active_view()))
         self.state.set_active_source(new_src_ast.apply_and_print({}, '#'))
         self.state.set_active_view(new_src_ast.apply_and_print(self.state.config, '#'))
