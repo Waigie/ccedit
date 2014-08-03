@@ -73,7 +73,8 @@ def eliminate_unused(ast):
             alternatives = Alternatives()
             for i in range(ast.alternative_count()):
                 alternatives.append(eliminate_unused(ast.alternatives()[i]))
-            return Choice([DimensionName(ast.name()), alternatives])
+            print(ast.name())
+            return Choice([DimensionName([ast.name()]), alternatives])
     else:
         return ast
 
