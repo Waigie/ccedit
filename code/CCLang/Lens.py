@@ -59,6 +59,25 @@ def minimize(ast, selects={}):
         return ast
 
 
+def eliminate_unused(ast):
+    if isinstance(ast, Code):
+        inner = list(map(lambda elem: eliminate_unused(elem), ast))
+        return Code(inner)
+    elif isinstance(ast, Choice):
+        all_equiv = True
+        for i in range(ast.alternative_count()):
+            all_equiv &= ast.alternatives()[0].equiv(ast.alternatives()[i])
+        if all_equiv:
+            return eliminate_unused(ast.alternatives()[0])
+        else:
+            alternatives = Alternatives()
+            for i in range(ast.alternative_count()):
+                alternatives.append(eliminate_unused(ast.alternatives()[i]))
+            return Choice([DimensionName(ast.name()), alternatives])
+    else:
+        return ast
+
+
 def update(config, oldast, newast):
-    return minimize(choice(config, oldast, newast))
+    return eliminate_unused(minimize(choice(config, oldast, newast)))
 

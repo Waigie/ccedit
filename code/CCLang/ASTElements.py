@@ -3,7 +3,6 @@ __author__ = 'Waigie'
 from lepl import List
 
 
-
 def configs(dims):
     if dims:
         current = dims.pop()

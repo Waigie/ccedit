@@ -135,6 +135,7 @@ class DimensionDock(QDockWidget):
                 dimension_item = dimension_item[0]
 
             dimension_item.setExpanded(True)
+            dimension_item.dimension = dimension
 
             if dimension in config:
                 self.update_alternatives(dimension_item, dimensions[dimension], config[dimension])
@@ -183,59 +184,6 @@ class DimensionDock(QDockWidget):
                     child.setCheckState(0, Qt.Unchecked)
 
                 item.insertChild(item.childCount()-1, child)
-
-
-        # for alternative in alternatives:
-        #     if item.child(counter) and isinstance(item.child(counter), AddAlternativeTreeItem):
-        #         item.child(counter).setText(0, alternative)
-        #         item.child(counter).dimension = item.text(0)
-        #         item.child(counter).alternative_num = counter
-        #     else:
-        #         child = AlternativeTreeItem(None, 0, alternative, Qt.Checked, self.delete_icon)
-        #         child.dimension = item.text(0)
-        #         child.alternative_num = counter
-        #         item.insertChild(item.childCount()-1, child)
-        #
-        #     counter += 1
-        #
-        # if counter < item.childCount():
-        #     for i in range(counter, item.childCount()):
-        #         child = item.child(i)
-        #         if isinstance(child, AddAlternativeTreeItem):
-        #             continue
-        #
-        #         item.takeChild(i)
-
-        # self.dimension_tree.clear()
-        #
-        # for dimension_name in dimensions.keys():
-        #
-        #     dimension = DimensionTreeItem(self.dimension_tree, 0, dimension_name, self.delete_icon)
-        #     dimension.setText(0, dimension_name)
-        #
-        #     alternative_num = 0
-        #     for alternative_name in dimensions[dimension_name]:
-        #         if dimension_name in config and alternative_num in config[dimension_name]:
-        #             alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Checked, self.delete_icon)
-        #         elif dimension_name in config:
-        #             alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Unchecked, self.delete_icon)
-        #         else:
-        #             alternative = AlternativeTreeItem(dimension, 0, alternative_name, Qt.Checked, self.delete_icon)
-        #
-        #         alternative.dimension = dimension_name
-        #         alternative.alternative_num = alternative_num
-        #
-        #         alternative_num += 1
-        #
-        #     add_alternative = AddAlternativeTreeItem(dimension, 0, self.add_icon)
-        #     add_alternative.dimension = dimension_name
-        #
-        #     dimension.setExpanded(True)
-        #
-        # AddDimensionTreeItem(self.dimension_tree, 0, self.add_icon)
-        # #self.dimension_tree.itemChanged.emit(None, 0)
-
-        # return None
 
     @Slot()
     def item_clicked(self, item, col):
