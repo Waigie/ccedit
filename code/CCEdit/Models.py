@@ -2,7 +2,7 @@ __author__ = 'Christoph Weygand'
 
 import ntpath
 import collections
-
+import json
 
 class ApplicationState():
     def __init__(self):
@@ -43,6 +43,15 @@ class ApplicationState():
         file = open(filename, mode="w")
         file.write(self.get_active_source())
         file.close()
+
+        dimension_data = json.dumps(self.dimensions)
+        directory = ntpath.dirname(filename)
+        dimension_file = directory + ntpath.sep + ".ccedit"
+
+        file = open(dimension_file, mode="w")
+        file.write(dimension_data)
+        file.close()
+
         self.tabs[self.active_tab].filename = filename
         self.tabs[self.active_tab].changed = False
 

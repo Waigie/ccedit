@@ -3,11 +3,12 @@ import CCLang
 __author__ = 'Christoph Weygand'
 
 from PySide.QtCore import QObject, Slot, Qt
-from PySide.QtGui import QFileDialog, QApplication
+from PySide.QtGui import QFileDialog, QApplication, QMessageBox
 from CCEdit.Models import ApplicationState, TabState
 import CCLang.Parser
 import CCLang.Lens
 import collections
+import ntpath, json
 
 
 class MainController(QObject):
@@ -54,10 +55,13 @@ class MainController(QObject):
             tab_state.source = file.read()
             file.close()
             self.state.tabs.append(tab_state)
-
             self.view.add_text_tab(tab_state.title())
+
+            self.load_configuration(ntpath.dirname(filename[0]))
+
             self.view.get_current_text_widget().textChanged.connect(self.text_change_handler)
             self.view.get_current_text_widget().setText(tab_state.source)
+            self.view.render_dimensiondock(self.state.dimensions, self.state.config)
 
     @Slot()
     def save_handler(self):
@@ -128,7 +132,6 @@ class MainController(QObject):
 
     @Slot()
     def tree_item_changed(self):
-        print("changed")
         new_config = {}
         new_dimensions = collections.OrderedDict()
         for i in range(self.view.dimension_dock.dimension_tree.topLevelItemCount()-1):
@@ -157,9 +160,33 @@ class MainController(QObject):
 
     def update_view(self, old_config):
         parser = CCLang.Parser.LEPLParser("#")
-        print(self.state.get_active_source(), self.state.get_active_view())
         new_src_ast = CCLang.Lens.update(old_config, parser.parse(self.state.get_active_source()), parser.parse(self.state.get_active_view()))
         self.state.set_active_source(new_src_ast.apply_and_print({}, '#'))
         self.state.set_active_view(new_src_ast.apply_and_print(self.state.config, '#'))
         self.view.set_display_text(self.state.get_active_view())
+
+    def load_configuration(self, dirname):
+        config_file = dirname + ntpath.sep + ".ccedit"
+
+        if ntpath.isfile(config_file):
+            file = open(config_file, mode="r")
+            config = file.read()
+            config_parsed = json.loads(config)
+            self.state.dimensions = collections.OrderedDict(sorted(config_parsed.items()))
+        else:
+            msgBox = QMessageBox()
+            msgBox.setWindowTitle("Configuration?")
+            msgBox.setText("No configuration file found")
+            msgBox.setInformativeText("Would you like to generate a dimension configuration from the opened file?")
+            msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            ret = msgBox.exec()
+            if ret == QMessageBox.Yes:
+                parser = CCLang.Parser.LEPLParser("#")
+                source = self.state.get_active_source()
+                source_ast = parser.parse(source)
+                dimensions = source_ast.dims()
+                dimensions_dict = collections.OrderedDict()
+                for dimension in dimensions:
+                    dimensions_dict[dimension.name()] = list(map(lambda n: "Alternative "+str(n), range(1, dimension.alternative_count()+1)))
+                self.state.dimensions = dimensions_dict
 

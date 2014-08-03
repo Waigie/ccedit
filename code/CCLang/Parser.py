@@ -25,7 +25,7 @@ class LEPLParser:
         self.choice += ~self.t_meta_marker & self.identifier & ~self.t_symbol("<") & self.alternatives \
             & ~self.t_meta_marker & ~self.t_symbol(">") > Choice
         self.code_snippet = (self.t_word | self.t_number | self.t_symbol | self.t_newline | self.t_tab)
-        self.code += (self.choice | self.code_snippet)[1:] > Code
+        self.code += ((self.choice | self.code_snippet)[1:]) | Empty() > Code
 
     def parse(self, code):
         result = self.code.parse(code)
