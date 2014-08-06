@@ -18,11 +18,12 @@ class TestCCLangEquiv(unittest.TestCase):
             ["#A< 1 #, #B< 1 #, 1 #> #>",                         "1"],
             ["#A< #B< 1 #, 1 #> #, 1 #>",                         "1"],
             ["#A< #B< 1 #, 2 #> #, #B< 1 #, 2 #> #>",             "#B< 1 #, 2 #>"],
-            ["#A< #B< 1 #, 2 #> #, #B< 3 #, 2 #> #>",             "#A< #B< 1 #, 2 #> #, #B< 3 #, 2 #> #>"]
+            ["#A< #B< 1 #, 2 #> #, #B< 3 #, 2 #> #>",             "#A< #B< 1 #, 2 #> #, #B< 3 #, 2 #> #>"],
+            ["#Foo< 1 #, 2 #>",                                   "#Foo< 1 #, 2 #>"]
         ]
 
         self.nequiv = [
-
+            ["#A< 1 #, 2 #>",                                     "1"],
         ]
 
     def test_equiv(self):
@@ -31,8 +32,8 @@ class TestCCLangEquiv(unittest.TestCase):
             left_ast = self.parser.parse(CCLang.Lens.eliminate_unused(left))
             self.assertTrue(left_ast.equiv(right_ast))
 
-    def test_equiv(self):
-        for left, right in self.equiv:
+    def test_nequiv(self):
+        for left, right in self.nequiv:
             right_ast = self.parser.parse(CCLang.Lens.eliminate_unused(right))
             left_ast = self.parser.parse(CCLang.Lens.eliminate_unused(left))
             self.assertFalse(left_ast.equiv(right_ast))
