@@ -13,7 +13,7 @@ class LEPLParser:
         self.t_word = Token("[A-Za-z0-9_]+")
         self.t_meta_marker = Token(meta_marker)
         self.t_value = Token(UnsignedReal())
-        self.t_symbol = Token("[^"+meta_marker+"0-9A-Za-z \t\r\n]")
+        self.t_symbol = Token("[^"+meta_marker+"0-9A-Za-z \t\r\n]+")
         self.t_number = Optional(self.t_symbol('-')) + self.t_value
         self.t_newline = Token("\r?\n")
         self.t_tab = Token("\t")

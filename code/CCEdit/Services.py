@@ -50,6 +50,5 @@ class Logger(logging.Handler):
     def emit(self, record):
         msg = self.format(record)
         self.container.print(msg)
-        print(self.format(record))
 
 

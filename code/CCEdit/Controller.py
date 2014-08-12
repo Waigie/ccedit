@@ -160,9 +160,14 @@ class MainController(QObject):
 
     def update_view(self, old_config):
         parser = CCLang.Parser.LEPLParser("#")
-        new_src_ast = CCLang.Lens.update(old_config, parser.parse(self.state.get_active_source()), parser.parse(self.state.get_active_view()))
-        self.state.set_active_source(new_src_ast.apply_and_print({}, '#'))
-        self.state.set_active_view(new_src_ast.apply_and_print(self.state.config, '#'))
+        print(old_config)
+        if self.state.get_active_changed():
+            src_ast = CCLang.Lens.update(old_config, parser.parse(self.state.get_active_source()), parser.parse(self.state.get_active_view()))
+            self.state.set_active_source(src_ast.apply_and_print({}, '#'))
+        else:
+            src_ast = parser.parse(self.state.get_active_source())
+
+        self.state.set_active_view(src_ast.apply_and_print(self.state.config, '#'), changed=False)
         self.view.set_display_text(self.state.get_active_view())
 
     def load_configuration(self, dirname):

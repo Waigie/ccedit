@@ -136,6 +136,7 @@ class DimensionDock(QDockWidget):
 
             dimension_item.setExpanded(True)
             dimension_item.dimension = dimension
+            dimension_item.child(dimension_item.childCount()-1).dimension = dimension
 
             if dimension in config:
                 self.update_alternatives(dimension_item, dimensions[dimension], config[dimension])
@@ -153,7 +154,6 @@ class DimensionDock(QDockWidget):
         self.dimension_tree.blockSignals(False)
 
     def update_alternatives(self, item, alternatives, config):
-        print(config)
         counter = 0
         for i in range(min(item.childCount(), len(alternatives))):
             if isinstance(item.child(i), AddAlternativeTreeItem):

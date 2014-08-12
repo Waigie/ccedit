@@ -73,12 +73,56 @@ def eliminate_unused(ast):
             alternatives = Alternatives()
             for i in range(ast.alternative_count()):
                 alternatives.append(eliminate_unused(ast.alternatives()[i]))
-            print(ast.name())
             return Choice([DimensionName([ast.name()]), alternatives])
     else:
         return ast
 
 
+def simplify(ast):
+    def find_in_ast(haystack, needle):
+        for index, subast in enumerate(haystack):
+            if subast == needle:
+                return index
+        return None
+
+    if isinstance(ast, Code):
+        rtn = Code([])
+        inners = map(lambda elem: simplify(elem), ast)
+        for inner in inners:
+            if isinstance(inner, Code):
+                for elem in inner:
+                    rtn.append(elem)
+            else:
+                rtn.append(inner)
+        return rtn
+    elif isinstance(ast, Choice):
+        simplified_alternatives = []
+        for i in range(ast.alternative_count()):
+            simplified_alternatives.append(simplify(ast.alternatives()[i]))
+
+        for subast in simplified_alternatives[0]:
+            references = []
+            for alternative in simplified_alternatives:
+                references.append(find_in_ast(alternative, subast))
+            if None not in references:
+                prefix_alternatives = []
+                for index, reference in enumerate(references):
+                    prefix_alternatives.append(Code(simplified_alternatives[index][0:reference]))
+                prefix_choice = Choice([DimensionName([ast.name()]), Alternatives(prefix_alternatives)])
+
+                suffix_alternatives = []
+                for index, reference in enumerate(references):
+                    suffix_alternatives.append(Code(simplified_alternatives[index][(reference+1):]))
+
+                suffix_choice = Choice([DimensionName([ast.name()]), Alternatives(suffix_alternatives)])
+
+                return simplify(eliminate_unused(Code([prefix_choice, simplified_alternatives[0][references[0]], suffix_choice])))
+
+        return Choice([DimensionName([ast.name()]), simplified_alternatives])
+    else:
+        return ast
+
+
 def update(config, oldast, newast):
-    return eliminate_unused(minimize(choice(config, oldast, newast)))
+    return simplify(minimize(choice(config, oldast, newast)))
 

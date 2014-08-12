@@ -14,9 +14,9 @@
 ####Near Furture:
 * GUI
     * add .dims file to store project dimensions and alternative names (dims file in the same directory as the source, 
-    one dims file per dir)
-    * dims file only editable via sidebar
+    one dims file per dir) - __Done__
+    * dims file only editable via sidebar - __Done__
     * dims in source but not in dims files => error
-    * only work in view mode
+    * only work in view mode - __Done__
     * update source on save or user action
     
