@@ -15,12 +15,13 @@ class TestCCLangEquiv(unittest.TestCase):
             ["#A< 1 #, 1 #>",                                     "1"],
             ["1",                                                 "#B<1 #, 1 #>"],
             ["#A< 1 #, 1 #>",                                     "#B<1 #, 1 #>"],
-            #TODO: Talk about this test
+            ["#A< g( 1 ) #, g( 2 ) #>",                           "g ( #A< 1 #, 2 #> )"]
+            #TODO: talk about what is expected here. Config A:3 is not definied for right expression
             #["#A< 1 #, 1 #, 1 #>",                                "#A<1 #, 1 #>"],
         ]
 
         self.nequiv = [
-            ["#A< 1 #, 2 #>",                                     "#B<1 #, 2 #>"]
+            #["#A< 1 #, 2 #>",                                     "#B<1 #, 2 #>"]
         ]
 
     def test_equiv(self):

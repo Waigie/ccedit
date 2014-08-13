@@ -174,7 +174,7 @@ class Code(CCList):
         for i in range(len(configured_children)):
             if isinstance(configured_children[i], Code):
                 elem = configured_children.pop(i)
-                for child in elem:
+                for child in reversed(elem):
                     configured_children.insert(i, child)
 
         return Code(configured_children)
