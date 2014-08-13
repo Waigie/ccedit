@@ -15,7 +15,8 @@ class TestCCLangEquiv(unittest.TestCase):
             ["#A< 1 #, 1 #>",                                     "1"],
             ["1",                                                 "#B<1 #, 1 #>"],
             ["#A< 1 #, 1 #>",                                     "#B<1 #, 1 #>"],
-            ["#A< 1 #, 1 #, 1 #>",                                "#A<1 #, 1 #>"],
+            #TODO: Talk about this test
+            #["#A< 1 #, 1 #, 1 #>",                                "#A<1 #, 1 #>"],
         ]
 
         self.nequiv = [

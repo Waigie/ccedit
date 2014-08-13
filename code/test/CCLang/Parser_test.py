@@ -8,7 +8,7 @@ from CCLang.ASTElements import *
 class TestCCLangParser(unittest.TestCase):
     def setUp(self):
         self.parser = CCLang.Parser.LEPLParser("#")
-        self.only_code_ast = Code(['void', 'testFunction', '(', ')', '{', '}'])
+        self.only_code_ast = Code(['void', 'testFunction', '()', '{}'])
         self.simple_ast = Code([
             Choice([DimensionName(['A']),
                     Alternatives([

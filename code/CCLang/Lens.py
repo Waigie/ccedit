@@ -41,7 +41,14 @@ def choice(config, oldast, newast, alt_counts=None):
 
 def minimize(ast, selects={}):
     if isinstance(ast, Code):
-        inner = list(map(lambda elem: minimize(elem, selects), ast))
+        tmp = list(map(lambda elem: minimize(elem, selects), ast))
+        inner = []
+        for elem in tmp:
+            if isinstance(elem, Code):
+                for sub in elem:
+                    inner.append(sub)
+            else:
+                inner.append(elem)
         return Code(inner)
     elif isinstance(ast, Choice) and not (ast.name() in selects.keys()):
         alternatives = Alternatives()
@@ -53,7 +60,7 @@ def minimize(ast, selects={}):
         return Choice([DimensionName([ast.name()]), alternatives])
     elif isinstance(ast, Choice) and ast.name() in selects.keys():
         selected = selects[ast.name()]
-        inner = minimize(ast.alternatives()[selected][0], selects)
+        inner = minimize(ast.alternatives()[selected], selects)
         return inner
     else:
         return ast
@@ -124,5 +131,5 @@ def simplify(ast):
 
 
 def update(config, oldast, newast):
-    return simplify(minimize(choice(config, oldast, newast)))
+    return eliminate_unused(minimize(choice(config, oldast, newast)))
 
