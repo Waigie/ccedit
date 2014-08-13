@@ -125,11 +125,11 @@ def simplify(ast):
 
                 return simplify(eliminate_unused(Code([prefix_choice, simplified_alternatives[0][references[0]], suffix_choice])))
 
-        return Choice([DimensionName([ast.name()]), simplified_alternatives])
+        return Choice([DimensionName([ast.name()]), Alternatives(simplified_alternatives)])
     else:
         return ast
 
 
 def update(config, oldast, newast):
-    return eliminate_unused(minimize(choice(config, oldast, newast)))
+    return simplify(minimize(choice(config, oldast, newast)))
 
