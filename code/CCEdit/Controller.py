@@ -1,7 +1,6 @@
+__author__ = 'Christoph Weygand <christophweygand@gmail.com>'
+
 import CCLang
-
-__author__ = 'Christoph Weygand'
-
 from PySide.QtCore import QObject, Slot, Qt
 from PySide.QtGui import QFileDialog, QApplication, QMessageBox
 from CCEdit.Models import ApplicationState, TabState

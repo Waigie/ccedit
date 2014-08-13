@@ -1,4 +1,4 @@
-__author__ = 'Waigie'
+__author__ = 'Christoph Weygand <christophweygand@gmail.com>'
 
 from lepl import List
 
@@ -135,15 +135,6 @@ class Alternatives(CCList):
     def apply_and_print(self, config, meta_marker):
         return self.apply_config(config).pretty_print(meta_marker)
 
-
-# class Alternative(CCList):
-#     def choices(self):
-#         return self[0].choices()
-#
-#     def pretty_print(self, choices, meta_marker):
-#         return self[0].pretty_print(choices, meta_marker)
-
-
 class Code(CCList):
     def dims(self):
         rtn = []
@@ -168,8 +159,6 @@ class Code(CCList):
                 configured_children.append(child.apply_config(config))
             else:
                 configured_children.append(child)
-
-        ## remove code -> code tree structure
 
         for i in range(len(configured_children)):
             if isinstance(configured_children[i], Code):

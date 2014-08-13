@@ -1,4 +1,4 @@
-__author__ = 'Christoph Weygand'
+__author__ = 'Christoph Weygand <christophweygand@gmail.com>'
 
 from lepl import *
 from CCLang.ASTElements import *

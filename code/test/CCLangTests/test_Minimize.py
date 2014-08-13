@@ -1,4 +1,4 @@
-__author__ = 'Waigie'
+__author__ = 'Christoph Weygand <christophweygand@gmail.com>'
 
 import unittest
 import CCLang.Parser

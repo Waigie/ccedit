@@ -1,3 +1,5 @@
+__author__ = 'Christoph Weygand <christophweygand@gmail.com>'
+
 import CCLang.Parser
 import CCLang.Lens
 

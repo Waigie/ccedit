@@ -1,4 +1,4 @@
-__author__ = 'Christoph Weygand'
+__author__ = 'Christoph Weygand <christophweygand@gmail.com>'
 
 import sys
 import os.path
