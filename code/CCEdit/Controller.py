@@ -35,6 +35,7 @@ class MainController(QObject):
         self.view.add_alternative.connect(self.add_alternative_handler)
 
         self.view.dimension_dock.dimension_tree.itemChanged.connect(self.tree_item_changed)
+        self.view.dimensions_reorder.connect(self.dimensions_reorder)
 
 
     @Slot()
@@ -157,11 +158,18 @@ class MainController(QObject):
 
         self.update_view(old_config)
 
+    @Slot()
+    def dimensions_reorder(self, order):
+        new_dimensions = collections.OrderedDict()
+        print(self.state.dimensions)
+        for dimension in order:
+            new_dimensions[dimension] = self.state.dimensions[dimension]
+        self.state.dimensions = new_dimensions
+
     def update_view(self, old_config):
         parser = CCLang.Parser.LEPLParser("#")
-        print(old_config)
         if self.state.get_active_changed():
-            src_ast = CCLang.Lens.update(old_config, parser.parse(self.state.get_active_source()), parser.parse(self.state.get_active_view()))
+            src_ast = CCLang.Lens.update(old_config, parser.parse(self.state.get_active_source()), parser.parse(self.state.get_active_view()), order=list(self.state.dimensions.keys()))
             self.state.set_active_source(src_ast.apply_and_print({}, '#'))
         else:
             src_ast = parser.parse(self.state.get_active_source())

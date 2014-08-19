@@ -3,7 +3,8 @@ __author__ = 'Christoph Weygand <christophweygand@gmail.com>'
 from CCLang.ASTElements import *
 import copy
 
-def choice(config, oldast, newast, alt_counts=None):
+
+def choice(config, oldast, newast, alt_counts=None, order=None):
     if alt_counts is None:
         alt_counts = {}
         for elm in oldast.dims():
@@ -17,22 +18,28 @@ def choice(config, oldast, newast, alt_counts=None):
     for k in config.keys():
         alt_counts[k] = max(alt_counts.get(k,  0), 2)
 
+    if order:
+        for dim in order:
+            if dim not in config:
+                config[dim] = list(range(alt_counts[dim]))
+
     if len(config.keys()) == 0:
         return newast
     else:
-        dim = sorted(config.keys())[0]
+        if order:
+            dim = order.pop(0)
+        else:
+            dim = sorted(config.keys())[0]
+
         sel = config.pop(dim)
-        if len(sel) != 1:
-            raise ValueError
-        sel = sel[0]
 
         alternatives = Alternatives()
 
         for i in range(alt_counts.get(dim, 0)):
-            if i != sel:
+            if i not in sel:
                 alternatives.append(oldast)
             else:
-                alternatives.append(choice(config, oldast, newast, alt_counts))
+                alternatives.append(choice(copy.deepcopy(config), oldast, newast, alt_counts=alt_counts, order=order))
 
         rtn = Code([Choice([DimensionName([dim]), alternatives])])
 
@@ -130,6 +137,6 @@ def simplify(ast):
         return ast
 
 
-def update(config, oldast, newast):
-    return simplify(minimize(choice(config, oldast, newast)))
+def update(config, oldast, newast, order=None):
+    return simplify(minimize(choice(config, oldast, newast, order=order)))
 

@@ -11,6 +11,7 @@ class MainWindow(QMainWindow):
     add_alternative = Signal(str)
     add_dimension = Signal()
     config_changed = Signal()
+    dimensions_reorder = Signal(list)
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -102,8 +103,12 @@ class DimensionDock(QDockWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.dimension_tree = QTreeWidget()
+        self.dimension_tree = CCTreeWidget()
         self.dimension_tree.setExpandsOnDoubleClick(False)
+        self.dimension_tree.setDragDropMode(QAbstractItemView.InternalMove)
+        self.dimension_tree.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.dimension_tree.setAcceptDrops(True)
+        self.dimension_tree.setDragEnabled(True)
         self.dimension_tree.setColumnCount(3)
         self.dimension_tree.setColumnWidth(1, 24)
         self.dimension_tree.setColumnWidth(2, 24)
@@ -197,6 +202,19 @@ class DimensionDock(QDockWidget):
             self.parent_window.add_dimension.emit()
 
 
+class CCTreeWidget(QTreeWidget):
+    def dropEvent(self, e):
+        QTreeWidget.dropEvent(self, e)
+        order = []
+        for i in range(self.topLevelItemCount()):
+            if isinstance(self.topLevelItem(i), AddDimensionTreeItem):
+                item = self.takeTopLevelItem(i)
+                self.addTopLevelItem(item)
+        for i in range(self.topLevelItemCount()-1):
+            order.append(self.topLevelItem(i).text(0))
+        self.parentWidget().parentWidget().parentWidget().dimensions_reorder.emit(order)
+
+
 class AlternativeTreeItem(QTreeWidgetItem):
     def __init__(self, parent, col, name, checkstate, icon):
         QTreeWidgetItem.__init__(self, parent, col)
@@ -211,6 +229,7 @@ class AlternativeTreeItem(QTreeWidgetItem):
 class AddAlternativeTreeItem(QTreeWidgetItem):
     def __init__(self, parent, col, icon):
         QTreeWidgetItem.__init__(self, parent, col)
+        self.setFlags(Qt.ItemIsEnabled)
         self.setIcon(0, icon)
         self.dimension = ''
 
@@ -219,7 +238,7 @@ class DimensionTreeItem(QTreeWidgetItem):
     def __init__(self, parent, col, name, icon):
         QTreeWidgetItem.__init__(self, parent, col)
         self.setText(0, name)
-        self.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable)
+        self.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable | Qt.ItemIsDragEnabled)
         self.dimension = name
         self.setIcon(2, icon)
 
@@ -227,5 +246,6 @@ class DimensionTreeItem(QTreeWidgetItem):
 class AddDimensionTreeItem(QTreeWidgetItem):
     def __init__(self, parent, col, icon):
         QTreeWidgetItem.__init__(self, parent, col)
+        self.setFlags(Qt.ItemIsEnabled)
         self.setIcon(0, icon)
         self.dimension = ''

@@ -4,19 +4,17 @@ import CCLang.Parser
 import CCLang.Lens
 
 parser = CCLang.Parser.LEPLParser("#")
-#source_str = "#A< ( true and false ) #, ( 1==1 and 1==2 ) #, ( true and 1==2 ) #>"
-source_str = "#A< g( 1 ) #, 2 #>";
-updated_view = "g( 2 )"
+source = "#A< #B< 1 #, 2 #> #, #B< 3 #, 4 #> #>"
+source_ast = parser.parse(source)
 
-source_ast = parser.parse(source_str)
+config = {"B": [0]}
+
+updated_view = "#A<5 #, 6 #>"
 view_ast = parser.parse(updated_view)
 
-print(source_ast)
-print(view_ast)
+new_source_ast = CCLang.Lens.update(config, source_ast, view_ast, order=['A', 'B'])
 
-new_ast = CCLang.Lens.update({"A": [1]}, source_ast, view_ast)
-print(new_ast)
-print(CCLang.Lens.minimize(new_ast))
-#print(CCLang.Lens.simplify(source_ast))
+print(new_source_ast)
+
 
 
